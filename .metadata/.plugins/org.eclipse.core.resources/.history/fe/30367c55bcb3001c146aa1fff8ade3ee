@@ -1,0 +1,15 @@
+package day0404;
+
+// 파일명과 같아야 public
+//public class Apple {	
+//}
+class Apple {
+	
+}
+
+
+public class Ex02Class {
+	public static void main(String[] args) {
+		
+	}
+}

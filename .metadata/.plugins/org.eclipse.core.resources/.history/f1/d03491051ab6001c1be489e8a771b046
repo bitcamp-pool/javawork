@@ -1,0 +1,20 @@
+package day0407;
+
+
+public class Ex02FileReadWrite {
+	
+	// 상수 선언
+	public static final String FILENAME = "D:\\bitjava0314\\files\\info.txt";
+	
+	public static void dataAdd(String name, String hp, String addr) {
+		
+	}
+	
+	public static void dataAllWrite() {
+		
+	}
+	
+	public static void main(String[] args) {
+		
+	}
+}

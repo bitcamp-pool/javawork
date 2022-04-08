@@ -1,0 +1,7 @@
+package day0404;
+
+public class Ex10Constructor {
+	public static void main(String[] args) {
+		
+	}
+}

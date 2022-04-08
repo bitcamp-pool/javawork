@@ -1,0 +1,26 @@
+package day0407;
+/*
+ * 직렬화(Serialization)
+ * 직렬화란 객체를 데이타 스트림으로 만드는것을 뜻한다
+   객체를 저장된 데이타를 스트림에 쓰기(write) 위해 연속적인(serial) 데이타로 변환하는것을 말한다
+    반대로 스트림으로부터 데이타를 읽어서 객체를 만드는것을 역직렬화(deserialization)라고 한다
+ */
+
+
+public class Ex03FileObject {
+	
+	public static final String FILENAME = "D:\\bitjava0314\\files\\shop.txt";
+	
+	public static void shopSave() {
+		
+	}
+	
+	public static void shopRead() {
+		
+	}
+	
+	public static void main(String[] args) {
+		shopSave();
+		shopRead();
+	}
+}

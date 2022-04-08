@@ -1,0 +1,66 @@
+package day0407;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Vector;
+
+public class Ex08ListFile {
+	
+	public static final String FILENAME = "D:\\bitjava0314\\files\\person.txt";
+	List<Person> list;
+	Scanner sc;
+	
+	public Ex08ListFile() {
+		list = new Vector<Person>();
+		sc = new Scanner(System.in);
+		fileRead();
+	}
+	
+	// 처음 시작 시 파일 읽어서 list에 데이터 넣기
+	public void fileRead() {
+		FileReader fr = null;
+		BufferedReader br = null;
+		try {
+			fr = new FileReader(FILENAME);
+			br = new BufferedReader(fr);
+			
+			while(true) {
+				String line = br.readLine();
+				if(line == null) break;
+				String[] s = line.split(",");
+				
+				Person p = new Person();
+				p.setName(s[0]);
+				p.setGender(s[1]);
+				p.setAddr(s[2]);
+				
+				// list에 추가
+				list.add(p);
+			}
+			System.out.println("총 " + list.size() + "개의 데이터 읽어옴!");
+			
+		} catch (FileNotFoundException e) {
+			System.out.println("저장된 데이터 없음");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(br!=null) br.close();
+				if(fr!=null) fr.close();
+			} catch (IOException e2) {
+			}
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		
+		Ex08ListFile ex = new Ex08ListFile();
+		ex.fileRead();
+		
+	}
+}

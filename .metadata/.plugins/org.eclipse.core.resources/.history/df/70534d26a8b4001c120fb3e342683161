@@ -1,0 +1,44 @@
+package day0405;
+
+class Parent {
+	public void process() {
+		System.out.println("부모가 딱히 하는 일이 없음");
+	}
+}
+////////////////////////////////////////
+class ChildA extends Parent {
+	@Override
+	public void process() {
+		System.out.println("페이트 칠을 합니다.");
+	}
+}
+///////////////////////////////////////
+class ChildB extends Parent {
+	@Override
+	public void process() {
+		System.out.println("집안 청소를 합니다.");
+	}
+}
+///////////////////////////////////////
+public class Ex07Abstract {
+	
+	public static void process(Parent p) {
+		// 다형성 처리
+		p.process();
+	}
+	
+	public static void main(String[] args) {
+		process(new ChildA());
+		process(new ChildB());
+	}
+}
+
+
+
+
+
+
+
+
+
+

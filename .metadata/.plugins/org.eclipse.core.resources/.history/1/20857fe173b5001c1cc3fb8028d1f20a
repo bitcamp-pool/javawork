@@ -1,0 +1,22 @@
+package day0406;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
+public class Ex14FileReader {
+	public static void main(String[] args) {
+		
+		FileReader fr = null;
+		BufferedReader br = null; // 줄 단위로 읽는 메서드를 가지고 있음
+		
+		try {
+			fr = new FileReader("D:\\bitjava0314\\files\\memo1.txt");
+			
+		} catch (FileNotFoundException e) {
+			System.out.println("파이일 없어요: " + e.getMessage());
+			e.printStackTrace(); // 에러메시지 추적
+		}
+		
+	}
+}

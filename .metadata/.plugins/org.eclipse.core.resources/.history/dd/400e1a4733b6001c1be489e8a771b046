@@ -1,0 +1,12 @@
+package day0407;
+/* Map 인터페이스의 특징
+ * Key와 Value를 매핑하는 객체
+ * Key는 절대 중복불가
+ * 각 Key는 1개의 Value만 매핑
+ * 정렬의 기준이 없다(키는 set 구조)
+ */
+public class Ex05Map {
+	public static void main(String[] args) {
+		
+	}
+}

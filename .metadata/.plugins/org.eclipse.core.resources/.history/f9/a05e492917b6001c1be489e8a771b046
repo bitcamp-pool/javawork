@@ -1,0 +1,8 @@
+package day0407;
+
+
+public class Ex02FileReadWrite {
+	public static void main(String[] args) {
+		
+	}
+}

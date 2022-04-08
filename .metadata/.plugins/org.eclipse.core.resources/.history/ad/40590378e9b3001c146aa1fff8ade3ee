@@ -1,0 +1,24 @@
+package day0404;
+
+import java.util.Date;
+
+public class Ex12Singleton {
+	
+	Date date;
+	public Ex12Singleton() {
+		date = new Date();
+	}
+	public void write() {
+		int y = date.getYear() + 1900;  // -1900을 반환
+		int m = date.getMonth() + 1; // 0~11
+		int d = date.getDate();
+		
+		System.out.println("오늘 날짜: " + y + "년" + m + "월" + d + "일");
+	}
+	
+	public static void main(String[] args) {
+		
+		Ex12Singleton ex = new Ex12Singleton();
+		ex.write();
+	}
+}

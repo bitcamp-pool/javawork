@@ -1,0 +1,19 @@
+package day0406;
+
+public class Ex10Throws {
+	
+	public static void test1(String su1, String su2) throws NumberFormatException {
+		int sum = Integer.parseInt(su1) * Integer.parseInt(su2);
+		System.out.println(su1+ "과" + su2 + "의 곱한 값은 " + sum + "입니다");
+	}
+	
+	public static void main(String[] args) {
+		
+		test1("4", "5");
+		
+		
+		
+		
+		System.out.println("**정상종료**");
+	}
+}

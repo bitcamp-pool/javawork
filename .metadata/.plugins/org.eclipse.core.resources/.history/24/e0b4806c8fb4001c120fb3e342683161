@@ -1,0 +1,20 @@
+package day0405;
+
+class Color {
+	private String colorName;
+	
+	Color(){
+		System.out.println("super 디폴트 생성자");
+	}
+}
+class Red extends Color {
+	Red(){
+		System.out.println("sub 디폴트 생성자");
+	}
+}
+
+public class Ex04Inheri {
+	public static void main(String[] args) {
+		Red red = new Red();
+	}
+}
