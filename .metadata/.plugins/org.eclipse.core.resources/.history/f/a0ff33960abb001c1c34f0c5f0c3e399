@@ -29,8 +29,8 @@ public class Ex02_MysqlPerson {
 	public Connection getConnection() {
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection(URL, "bit901", "a1234");
-//			conn = DriverManager.getConnection(URL, "root", "1234");
+//			conn = DriverManager.getConnection(URL, "bit901", "a1234");
+			conn = DriverManager.getConnection(URL, "root", "1234");
 			System.out.println("db 연결 성공!");
 		} catch (SQLException e) {
 			System.out.println("db 연결 실패: " + e.getMessage());
@@ -107,7 +107,7 @@ public class Ex02_MysqlPerson {
 			pstmt.setString(1, name);
 			pstmt.execute();
 			
-			System.err.println("DB에 "+ name +" 님의 데이터가 삭제되었어요!!");
+			System.err.println("DB에"+ name +" 님의 데이터가 삭제되었어요!!");
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

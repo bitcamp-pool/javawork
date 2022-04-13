@@ -16,7 +16,6 @@ public class Ex12Singleton {
 //		cal = new Calendar(); // 생성자가 protected라 생성안됨
 		cal = Calendar.getInstance();
 	}
-	@SuppressWarnings("deprecation")
 	public void write() {
 		int y = date.getYear() + 1900;  // -1900을 반환
 		int m = date.getMonth() + 1;    // 0~11 반환

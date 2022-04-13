@@ -5,9 +5,7 @@ import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-public class Ex10Frame extends Frame implements WindowListener {	
-	private static final long serialVersionUID = 1L;
-
+public class Ex10Frame extends Frame implements WindowListener {
 	public static void main(String[] args) {
 		
 		new Ex10Frame(); //디폴트 생성자 호출

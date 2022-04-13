@@ -1,7 +1,6 @@
 package day0405;
 
 class Apple {
-	@SuppressWarnings("unused")
 	private void methodA() {
 		System.out.println("super 메서드 A");
 	}

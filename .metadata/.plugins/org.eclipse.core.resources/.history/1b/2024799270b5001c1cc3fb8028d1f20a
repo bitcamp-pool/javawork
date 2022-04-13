@@ -1,9 +1,0 @@
-package day0406;
-
-
-
-public class Ex13FileException {
-	public static void main(String[] args) {
-		
-	}
-}

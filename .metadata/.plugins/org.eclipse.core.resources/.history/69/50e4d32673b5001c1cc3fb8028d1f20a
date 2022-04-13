@@ -1,8 +1,0 @@
-package day0406;
-
-public class Ex14FileReader {
-	public static void main(String[] args) {
-		
-		
-	}
-}

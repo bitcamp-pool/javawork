@@ -23,7 +23,7 @@
 			<section name="spreadsheet">
 				<item key="enabledPanelIds" value="value-view"/>
 				<item key="activePanelId" value="value-view"/>
-				<item key="panelRatio" value="300"/>
+				<item key="panelRatio" value="164"/>
 				<item key="panelsVisible" value="true"/>
 				<item key="verticalLayout" value="false"/>
 			</section>
@@ -35,7 +35,7 @@
 		<item key="DIALOG_X_ORIGIN" value="506"/>
 		<item key="DIALOG_Y_ORIGIN" value="190"/>
 		<item key="DIALOG_WIDTH" value="700"/>
-		<item key="DIALOG_HEIGHT" value="645"/>
+		<item key="DIALOG_HEIGHT" value="553"/>
 		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
 	</section>
 	<section name="DBeaver.QM.LogViewer">
@@ -43,16 +43,16 @@
 	<section name="DBeaver.ScriptSelectorPopup">
 		<item key="DIALOG_X_ORIGIN" value="387"/>
 		<item key="DIALOG_Y_ORIGIN" value="281"/>
-		<item key="DIALOG_WIDTH" value="555"/>
+		<item key="DIALOG_WIDTH" value="948"/>
 		<item key="DIALOG_HEIGHT" value="364"/>
 		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
 	</section>
 	<section name="DBeaver.StandardErrorDialog">
-		<item key="showDetails" value="false"/>
+		<item key="showDetails" value="true"/>
 		<item key="DIALOG_X_ORIGIN" value="403"/>
 		<item key="DIALOG_Y_ORIGIN" value="394"/>
 		<item key="DIALOG_WIDTH" value="522"/>
-		<item key="DIALOG_HEIGHT" value="194"/>
+		<item key="DIALOG_HEIGHT" value="373"/>
 		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
 	</section>
 	<section name="DBeaver.SelectDataSourceDialog">
@@ -61,5 +61,17 @@
 		<item key="DIALOG_WIDTH" value="307"/>
 		<item key="DIALOG_HEIGHT" value="687"/>
 		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
+	</section>
+	<section name="DBeaver.DriverManagerDialog">
+		<item key="DIALOG_X_ORIGIN" value="512"/>
+		<item key="DIALOG_Y_ORIGIN" value="233"/>
+		<item key="DIALOG_WIDTH" value="453"/>
+		<item key="DIALOG_HEIGHT" value="436"/>
+		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
+	</section>
+	<section name="DBeaver.MySQLSessionEditor">
+		<item key="MainSashRatio" value="700"/>
+		<item key="DetailsSashRatio" value="200"/>
+		<item key="hideSleeping" value="false"/>
 	</section>
 </section>

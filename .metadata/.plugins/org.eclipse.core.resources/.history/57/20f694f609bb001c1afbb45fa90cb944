@@ -3,7 +3,7 @@ package day0406;
 import java.util.Date;
 
 public class Ex09Exception {
-	@SuppressWarnings({ "deprecation", "null" })
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		
 		Date date = null;		// 예외 발생되는 경우
