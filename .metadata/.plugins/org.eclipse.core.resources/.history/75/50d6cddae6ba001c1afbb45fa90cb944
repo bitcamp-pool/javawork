@@ -1,0 +1,26 @@
+package day0412;
+
+public class DatabaseFlugIn {
+
+	/*
+	 * 1. 이클립스 [Help]메뉴 ->Eclipse Marketplace선택
+	 * 2. Find : dbeaver
+	 * 3. DBeaver 22.0.2 설치
+	 * 4. Eclipse 재시작
+	 * 5. Open Perspective > DBeaver 열기 
+	 * 
+	 * https://dbeaver.io/download/
+	 * Eclipse Plugin
+	 * Update site URL: https://dbeaver.io/update/latest/ (Multiplatform)
+	 * Eclipse Marketplace direct install: https://marketplace.eclipse.org/content/dbeaver
+	 * 
+	 */	
+	
+	/* JDBC 드라이버 
+	 * 
+	 * C:\oraclexe\app\oracle\product\11.2.0\server\jdbc\lib
+	 * 
+	 * D:/bitjava0314/drivers/maven/maven-central/com.oracle.database.jdbc/ojdbc8-12.2.0.1.jar
+	 * D:/bitjava0314/drivers/maven/maven-central/mysql/mysql-connector-java-8.0.17
+	 */
+}

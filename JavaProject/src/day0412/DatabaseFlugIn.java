@@ -15,4 +15,16 @@ public class DatabaseFlugIn {
 	 * Eclipse Marketplace direct install: https://marketplace.eclipse.org/content/dbeaver
 	 * 
 	 */	
+	
+	/* JDBC 드라이버 
+	 * 
+	 * JavaProject>마우스 오른>Build Path->Configure Build Path
+	   Add JARs 			: 프로젝트 폴더 내에 있는 라이브러리 파일 등록 (상대 경로 지정)
+	   Add External JARs 	: 위부 폴더에 있는 라이브러리 파일 직접 등록 (절대 경로 지정)
+	   Add Variable 		: 즐겨찾기 해둔 라이브러리 경로 사용
+	 * 
+	 * C:\oraclexe\app\oracle\product\11.2.0\server\jdbc\lib
+	 * D:/bitjava0314/drivers/maven/maven-central/com.oracle.database.jdbc/ojdbc8-12.2.0.1.jar
+	 * D:/bitjava0314/drivers/maven/maven-central/mysql/mysql-connector-java-8.0.17
+	 */
 }

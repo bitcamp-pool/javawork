@@ -22,9 +22,9 @@
 		<column name="Comment" visible="true" order="6" width="100"/>
 	</item>
 	<item id="scriptSelectorViewer">
-		<column name="Script" visible="true" order="0" width="124"/>
-		<column name="Time" visible="true" order="1" width="152"/>
-		<column name="Info" visible="true" order="2" width="37"/>
-		<column name="Folder" visible="true" order="3" width="199"/>
+		<column name="Script" visible="true" order="0" width="222"/>
+		<column name="Time" visible="true" order="1" width="250"/>
+		<column name="Info" visible="true" order="2" width="135"/>
+		<column name="Folder" visible="true" order="3" width="297"/>
 	</item>
 </items>

@@ -1,0 +1,19 @@
+-- JDBC 연결을 위한 테이블 생성
+
+-- 시퀀스 생성
+CREATE SEQUENCE seq_bit nocache;
+
+-- 테이블 생성
+CREATE TABLE sawon (
+	num 		number(5) CONSTRAINT sawon_pk_num PRIMARY KEY,
+	name 		varchar2(20),
+	buseo 		varchar2(20),
+	gibon 		number(10),
+	sudang 		number(10),
+	writeday 	date
+);
+
+-- 자바프로젝트 
+-- JDBC 연결하여 데이터 추가 및 조회 기능 구현
+select * from sawon order by name;
+

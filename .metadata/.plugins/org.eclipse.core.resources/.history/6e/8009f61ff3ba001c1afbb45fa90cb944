@@ -1,0 +1,85 @@
+package day0413;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class Ex02_MysqlPerson {
+
+	static final String DRIVER = "com.mysql.cj.jdbc.Driver";
+	static final String URL = "jdbc:mysql://localhost:3306/bit901";
+//  static final String URL = "jdbc:mysql://localhost:3306/bit901?serverTimezone=Asia/Seoul"; //8버전
+	Scanner sc = new Scanner(System.in);
+	
+	public Ex02_MysqlPerson() {
+		try {
+			Class.forName(DRIVER);
+			System.out.println("mysql 드라이버 성공");
+		} catch (ClassNotFoundException e) {
+			System.out.println("mysql 드라이버 실패: " + e.getMessage());
+		}
+	}
+	
+	// db 서버에 연결하는 메서드
+	public Connection getConnection() {
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection(URL, "bit901", "a1234");
+			System.out.println("db 연결 성공!");
+		} catch (SQLException e) {
+			System.out.println("db 연결 실패: " + e.getMessage());
+		}
+		return conn;
+	}
+	
+	public int getMenu() {
+		System.out.println("---------------");
+		System.out.println("** 메뉴선택 **");
+		System.out.println("1.추가  2.전체출력  3.삭제  4.분석  5.종료");
+	    int n = Integer.parseInt(sc.nextLine());
+	    return n;
+	}
+	
+	public void personInsert() {
+		
+	}
+	
+	public void personDelete() {
+		
+	}
+	
+	public void personBloodGroup() {
+		
+	}
+	
+	public void personAllWrite() {
+		
+	}
+	
+	public static void main(String[] args) {
+		Ex02_MysqlPerson ex = new Ex02_MysqlPerson();
+		
+		while(true) {
+			int n = ex.getMenu();
+			switch (n) {
+			case 1:
+				ex.personInsert();
+				break;
+			case 2:
+				ex.personAllWrite();
+				break;
+			case 3:
+				ex.personDelete();
+				break;
+			case 4:
+				ex.personBloodGroup();
+				break;
+			default:
+				System.out.println("프로그램 종료!!");
+				System.exit(0);
+				break;
+			}
+		}			
+	}
+}
