@@ -1,7 +1,0 @@
-package day0407;
-
-public class Ex08ListFile {
-	public static void main(String[] args) {
-		
-	}
-}

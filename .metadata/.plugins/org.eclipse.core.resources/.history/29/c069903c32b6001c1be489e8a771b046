@@ -1,9 +1,0 @@
-package day0407;
-/* Map 인터페이스
- * 
- */
-public class Ex05Map {
-	public static void main(String[] args) {
-		
-	}
-}

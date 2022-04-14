@@ -94,20 +94,27 @@ public class Ex02_MysqlPerson {
 	public void personDelete() {
 		// 이름을 입력 후 해당 데이터 삭제
 		// 삭제 후 "삭제되었습니다" 메시지 출력
-		System.out.print("삭제할 이름 입력: ");
-		String name = sc.nextLine();
-		
+		// 이름이 없으면 "OOO님은 명단에 없습니다." 출력
+		String name = "";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		String sql = "delete from person where name = ?";
 		
+		System.out.println("삭제할 이름 입력");
+		name = sc.nextLine();
+		// db 연결
+		conn = this.getConnection();		
 		try {
-			conn = this.getConnection();
 			pstmt = conn.prepareStatement(sql);
+			// ? 에 바인딩
 			pstmt.setString(1, name);
-			pstmt.execute();
-			
-			System.err.println("DB에 "+ name +" 님의 데이터가 삭제되었어요!!");
+			// 실행
+			int n = pstmt.executeUpdate(); // 성공한 레코드의 개수 반환
+//			pstmt.execute();
+			if(n == 0)
+				System.out.println(name + " 님은 명단에 없습니다");
+			else
+				System.out.println("총 " + n + "명의 " + name + "님이 삭제되었습니다");
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -125,16 +132,17 @@ public class Ex02_MysqlPerson {
 	public void personBloodGroup() {
 		// 혈액형별 인원수와 평균 나이 출력(group by)
 		/* 
-		 * 혈액형	인원수	평균나이
+		 * 혈액형	인원수	평균나이1
 		 * A형		2		32(정수로)
 		 * B형		3		40
 		 */
+		
+		String sql = 	"select upper(blood) blood, count(blood) count, round(avg(age), 0) age "
+					+ 	"from person p "
+					+ 	"group by blood;";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
-		String sql = "select blood, count(blood) count, floor(avg(age)) age "
-				+ "from person group by blood";
 		
 		conn = this.getConnection();
 		try {
@@ -142,13 +150,15 @@ public class Ex02_MysqlPerson {
 			rs = pstmt.executeQuery();
 			
 			// 데이터 출력
+			System.out.println("\t** 혈액형별 분석표 **");
+			System.out.println();
 			System.out.println("혈액형\t인원수\t평균나이");
 			while(rs.next()) {
-				String blood = rs.getString("blood").toUpperCase();
-				int count = Integer.parseInt(rs.getString("count"));
+				String blood = rs.getString("blood");
+				int count = rs.getInt("count");
 				int age = rs.getInt("age");
 				
-				System.out.println(blood + "\t" + count + "\t" + age);
+				System.out.println(blood + "형\t" + count + "명\t" +  age + "세");
 			}
 			
 		} catch (SQLException e) {

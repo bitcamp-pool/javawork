@@ -1,8 +1,0 @@
-package day0407;
-
-
-public class Ex01FileReadWrite {
-	public static void main(String[] args) {
-		
-	}
-}
