@@ -23,11 +23,12 @@
 		/*
 		 * 1. eclips > window > preferences
 		 * 2. Java > editor > content Assist
-		 * 3. 항목 [Auto Activation]
+		 * 3. 항목 [Auto Activation] default 1)0 2). 3)@#
 		 *    Auto activation triggers for java
-		 *    -> <=$:{.@qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM
+		 *    -> <=$:{.@qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM}
+		 *             .qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM
 		 *    -> Apply and close
-		 *    .qwertyuioplkjhgfdsazxcvbnm_QWERTYUIOPLKJHGFDSAZXCVBNM
+		 *    
 		 *  참조) https://stackoverflow.com/questions/5685257/any-way-to-get-intellij-like-autocompletion-in-eclipse/12349932#12349932
 		 */
 		
