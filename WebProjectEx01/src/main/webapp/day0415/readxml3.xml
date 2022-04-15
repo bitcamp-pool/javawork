@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<list>
+	<person name="강동원" age="39세">
+		<addr>서울시 강남구</addr>
+		<photo>../image/9.jpg</photo>
+	</person>
+	<person name="설현" age="22세">
+		<addr>제주도 애월읍</addr>
+		<photo>../image/15.jpg</photo>
+	</person>
+	<person name="신민아" age="31세">
+		<addr>미국 뉴욕</addr>
+		<photo>../image/17.jpg</photo>
+	</person>
+</list>

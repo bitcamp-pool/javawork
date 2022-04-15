@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>   
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+</head>
+<body>
+<h2 class="alert alert-success" style="width: 400px">폼태그 연습</h2>
+<form action="Ex04_Action.jsp" method="post"> <!-- 포스트 방식: url에 값이 나타나지 않음 (method는 생략하면 기본이 get)-->
+	<table class="table table-bordered" style="width: 400px;">
+		<tr>
+			<th bgcolor = "pink">글자색</th>
+			<td>
+				<input type="color" name="fcolor"  value="#ffccff" 
+				class = "form-control">
+			</td>
+		</tr>
+		<tr>
+			<th bgcolor = "pink">생년월일</th>
+			<td>
+				<input type="date" name = "birth"
+				class = "form-control" value="1989-12-12">
+			</td>
+		</tr>
+		<tr>
+			<th bgcolor = "pink">취미</th>
+			<td>
+				<input type="checkbox" name = "hobby" value="낚시">낚시
+				<input type="checkbox" name = "hobby" value="골프">골프
+				<input type="checkbox" name = "hobby" value="여행">여행
+				<input type="checkbox" name = "hobby" value="게임">게임
+			</td>
+		</tr>
+		<tr>
+			<th bgcolor = "pink">이미지</th>
+			<td>
+				<select name="photo" size="5" style="width:120px" multiple="multiple">
+					<option value="../image/01.png">인형1</option>
+					<option value="../image/02.png">인형2</option>
+					<option value="../image/03.png">인형3</option>
+					<option value="../image/04.png">인형4</option>
+					<option value="../image/05.png">인형5</option>
+				</select>
+			</td>
+		</tr>		
+		<tr>
+			<td colspan="2" align="center">
+				<button type="submit" class="btn btn-info"
+				style="width: 200px;">서버로 전송</button>
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

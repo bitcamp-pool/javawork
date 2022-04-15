@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<dolls>
+	<doll title="원시인">
+		<photo>../image2/c1.png</photo>
+	</doll>
+	<doll title="베트맨">
+		<photo>../image2/c3.png</photo>
+	</doll>
+	<doll title="슈퍼마리오">
+		<photo>../image2/c5.png</photo>
+	</doll>
+</dolls>

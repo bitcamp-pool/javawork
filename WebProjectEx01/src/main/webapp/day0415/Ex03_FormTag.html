@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>   
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+</head>
+<body>
+<h2 class="alert alert-success" style="width: 400px">폼태그 연습</h2>
+<form action="Ex03_Action.jsp" method="get">
+	<table class="table table-bordered" style="width: 400px;">
+		<tr>
+			<th bgcolor = "pink">이름</th>
+			<td>
+				<input type="text" name = "name" style="width: 150px;"
+				class = "form-control" autofocus="autofocus"
+				required="required">
+			</td>
+		</tr>
+		<tr>
+			<th bgcolor = "pink">이메일</th>
+			<td>
+				<input type="email" name = "email" style="width: 150px;"
+				class = "form-control" required="required"> <!-- 설명 나오게 -->
+			</td>
+		</tr>
+		<tr>
+			<th bgcolor = "pink">운전면허</th>
+			<td>
+				<input type="checkbox" name = "driver">운전면허
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">
+				<button type="submit" class="btn btn-info"
+				style="width: 200px;">서버로 전송</button>
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

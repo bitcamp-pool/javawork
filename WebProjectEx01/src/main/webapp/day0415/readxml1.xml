@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<list>
+	<shop num="1">
+		<price>12000</price>
+		<sangpum>브이넥티</sangpum>
+		<path>../image2/1.jpg</path>
+	</shop>
+	<shop num="2">
+		<price>24000</price>
+		<sangpum>프릴원피스</sangpum>
+		<path>../image2/7.jpg</path>
+	</shop>
+	<shop num="3">
+		<price>39000</price>
+		<sangpum>썬그라스</sangpum>
+		<path>../image2/23.jpg</path>
+	</shop>
+	<shop num="4">
+		<price>12000</price>
+		<sangpum>화이트블라우스</sangpum>
+		<path>../image2/28.jpg</path>
+	</shop>
+	<shop num="5">
+		<price>19000</price>
+		<sangpum>체크원피스</sangpum>
+		<path>../image2/16.jpg</path>
+	</shop>
+</list>

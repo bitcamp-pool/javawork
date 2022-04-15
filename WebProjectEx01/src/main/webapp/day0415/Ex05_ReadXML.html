@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>   
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style type="text/css">
+	body * {
+		font-size: 1.5rem;
+		font-family: 'Jua';
+	}
+	#out {
+		position: absolute;
+		left: 250px;
+		top: 200px;
+		width: 800px;
+		height: 500px;
+		border: 2px solid orange;
+		padding: 20px 20px;
+	}
+	figure {
+		float:left;
+		margin-left:30px;
+	}
+	figure img {
+		width: 120px;
+		height: 160px;
+		
+	}
+	figure figcaption {
+		font-size: 20px;
+		font-family: 'Gamja Flower';
+		margin-left:20px;
+	} 
+</style>
+<script type="text/javascript">
+	/* 	ajax는 웹 프로그램에서 GET, POST의 웹 요청과 응답 기능이 아닌 
+		자바스크립트로 웹 서버와 비동기 통신을 위한 웹 개발 기법입니다. 
+		단순하게 웹 화면의 재 요청없이 자바스크립트만을 이용해 
+		서버와 데이터를 주고 받는 방식입니다.
+		바닐라 버전에서의 ajax를 구현하려고 하면 XMLHttpRequest 클래스를 이용
+	*/
+	$(function(){
+		$("#btn1").click(function(){
+			$.get("readxml1.xml", function(data){ // Ajax함수사용
+				//alert($(data).length); // 1개 출력: list태그가 1이므로..
+				alert($(data).find("shop").length); // 5개 출력
+				
+				var s = "";
+				$(data).find("shop").each(function(i, ele){
+					var n=$(ele);
+					
+					s+="상품번호:"+n.attr("num")+"<br>";
+					s+="상품명:"+n.find("sangpum").text()+"<br>"; 
+					s+="가격:"+n.find("price").text()+"<br>";
+					
+					var path = n.find("path").text();
+					s+="이미지경로:"+path+"<br>"; 
+					s+="<img src='" + path + "' width=120>";
+					
+					s+="<hr>";
+				});
+				
+				$("#out").html(s);
+			});
+			
+			$("#btn2").click(function(){
+				$.get("readxml2.xml", function(data){ // http get방식 Ajax요청
+					var s="";
+					$(data).find("doll").each(function(i, element){
+						var n = $(element);
+						s+="<figure>";
+						s+="<img src='" + n.find("photo").text() + "'>";
+						s+="<figcaption>" + n.attr("title") + "</figcaption>";
+						s+="</figure>";
+					});
+					$("#out").html(s);
+				});
+			});
+			
+			$("#btn3").click(function() {
+				jQuery.get("readxml3.xml", function(data) {
+					var s="";
+					jQuery(data).find("person").each(function(i, element) {
+						var n = jQuery(element);
+						s+="<figure>";
+						s+="<img src='" + n.find("photo").text() + "'>";
+						s+="<figcaption>" 
+							+ n.attr("name") 
+							+ "(" + n.attr("age")
+							+ ")</figcaption><br>"
+							+ n.find("addr").text();
+						s+="</figure>";
+					});
+					$("#out").html(s);
+				});
+			});
+		});
+	});
+</script>
+</head>
+<body>
+<!-- Ajax란 무엇인가?
+비 동기방식의 자바스크립트와 XML (Asynchronous JavaScript and XML)
+기존의 웹 방식과 달리 특별한 프로그램의 설치없이 사용자에게 즉각적인 반응과 
+풍부한 UI경험을 제공하는 새로운 방식의 기술이다. 
+이 방식은 ActiveX와 같은 설치 없이 웹브라우저가 제공하는 기본 기능만으로 구현된다.
+(좀 더 유용한 정보를 원하시면 : https://developer.mozilla.org/en/AJAX ))
+ -->
+	<img alt="" src="../image/12.jpg" width="200">
+	<button type="button" class="btn btn-info" id="btn1" style="width:130px;">XML읽기 #1</button>
+	<button type="button" class="btn btn-info" id="btn2" style="width:130px;">XML읽기 #2</button>
+	<button type="button" class="btn btn-info" id="btn3" style="width:130px;">XML읽기 #3</button>
+	<div id="out">111</div>
+</body>
+</html>

@@ -6,7 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="Drivers/ojdbc8-12.2.0.1.jar"/>
 	<classpathentry kind="lib" path="Drivers/mysql-connector-java-8.0.17.jar"/>
+	<classpathentry kind="lib" path="Drivers/ojdbc5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
