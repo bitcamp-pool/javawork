@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>   
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  div.list{
+    font-size: 20px;
+    font-family: 'Jua';
+    position: absolute;
+    left: 500px;
+    top: 100px;
+  }
+  div.form{
+    font-size: 20px;
+    font-family: 'Jua';
+    position: absolute;
+    left: 150px;
+    top: 100px;
+  }
+</style>
+<script>
+  $(function(){
+    // 처음 로딩시 list() 호출
+    list();
+
+    // 버튼 클릭시 목록 가져오기
+    $("#btn1").click(function(){
+      list();
+    });
+
+    // 처음에는 입력폼 안보이게 처리
+    $("div.form").hide();
+
+    // 버튼 클릭시 입력폼이 나타났다 사라졌다 하기
+    $("#btnshow").click(function(){
+      $("div.form").toggle(); // show + hide
+    });
+
+    // 포토 옵션 리스트 생성
+    opts = "";
+    for(i=1; i<=20; i++){
+    	opts += "<option value='../image/"+ i + ".jpg'>이미지 " + i + "</option>"
+    }
+    $("#photo").html(opts);
+    
+    // select의 첫번째 value값을 이미지 selphoto에 넣는다
+    $("#selphoto").attr("src", $("#photo").val());
+
+    // select를 변경시 value값을 얻어서 selphoto의 이미지 변경
+    $("#photo").change(function(){
+      $("#selphoto").attr("src", $(this).val());
+    })
+    
+    // db 저장 이벤트
+    $("td.send").click(function(){
+    	// 입력값 읽기
+    	var name = $("#name").val();
+    	var hp = $("#hp").val();
+    	var addr = $("#addr").val();
+    	var photo = $("#photo").val();
+    	
+    	$.ajax({
+    		type:"post",
+    		dataType:"html", /*데이터를 리턴받지 않으므로 html*/
+    		url:"studataread.jsp",
+    		data:{"name":name, "hp":hp, "addr":addr, "photo":photo},
+    		success:function(){
+    			// db저장 후 다시 목록 출력
+    			list();
+    			
+    			// 입력값 지우기
+    			$("#name").val("");
+    			$("#hp").val("");
+    			$("#addr").val("");
+    		}
+    	});
+    	
+    });
+  });
+
+  // 사용자 함수(목록보기)
+  function list(){
+    $.ajax({
+      type:"get", // method GET방식 : 한글 안깨지게
+      url:"stutoxml.jsp",
+      dataType:"xml",
+      success:function(data){
+        var s = "<table class = 'table table-bordered' style='width:500px;'>";
+        s+="<caption><b>" + $(data).find("stu").length
+          + "개의 데이터가 있습니다.</b></caption>";
+          // stu를 찾아서 반복
+          $(data).find("stu").each(function(i, element){
+            var d=$(element);
+              s+="<tr>";
+              s+="<td width='200' rowspan='5'>";
+              s+="<img src='" + d.find("photo").text() + "'width=200>";
+              s+="</td>";
+              s+="<td>번호 : " + d.find("num").text() + "</td>";
+              s+="</tr>";
+              
+              // 2번째 줄~
+              s+="<tr><td>이름  :"   + d.find("name").text() + "</td></tr>"
+              s+="<tr><td>핸드폰:"   + d.find("hp").text()   + "</td></tr>";
+              s+="<tr><td>주소  :"   + d.find("addr").text() + "</td></tr>";
+              s+="<tr><td>";
+              s+="<button type='button' class='btn btn-danger btn-xs' class='del'>삭제</button>";
+              s+="</td></tr>";
+          });
+
+        s+="</table>";
+        $("div.list").html(s);
+      },
+      statusCode: {
+        404:function(){
+          alert("파일을 찾을 수 없어요!");
+        },
+        500:function(){
+          alert("서버오류.. 코드를 다시 한 번 살펴보세요")
+        }
+      }
+    });
+  }
+</script>
+</head>
+<body>
+  <div style="margin-left: 300px;">
+    <button type="button" class="btn btn-success" id="btnshow">
+      STU 입력폼 show/hide
+    </button>
+    <button type="button" class="btn btn-info" id="btn1">
+      Stu DB 데이터 가져오기
+    </button>
+  </div>
+  <div class="form">
+      <form action="#" class="form-inline">
+        <table class="table table-bordered" style="width: 320px;">
+          <caption><b>STU입력폼</b></caption>
+          <tr>
+            <th bgcolor="pink" width="100">이름</th>
+            <td>
+              <input type="text" id="name" class="form-con">
+            </td>
+          </tr>
+          <tr>
+            <th bgcolor="pink" width="100">핸드폰</th>
+            <td>
+              <input type="text" id="hp" class="form-con">
+            </td>
+          </tr>
+          <tr>
+            <th bgcolor="pink" width="100">주소</th>
+            <td>
+              <input type="text" id="addr" class="form-control">
+            </td>
+          </tr>
+          <tr>
+            <th bgcolor="pink" width="100">사진</th>
+            <td>
+              <select id="photo" style="width: 100px;" class="form-control">
+                <!-- <script type="text/javascript">
+                  for(i=1; i<=20; i++){
+                    document.write("<option value='../image/"+ i + ".jpg'>이미지 " + i + "</option>");
+                  }
+                </script> -->
+              </select>
+              <img src="" id="selphoto" width="70" height="70">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="cursor: pointer;" class="send" align="center" bgcolor="pink">
+              DB 저장
+            </td>
+          </tr>
+        </table>
+      </form>
+  </div>
+  <div class="list">
+    list
+  </div>
+</body>
+</html>
