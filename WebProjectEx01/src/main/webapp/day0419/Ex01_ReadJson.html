@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<link
+	href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap"
+	rel="stylesheet">
+<style>
+body * {
+	font-size: 1.3rem;
+	font-family: 'Jua';
+}
+
+div.shop {
+	width: 300px;
+	height: 120px;
+	border: 1px solid black;
+	margin-bottom: 10px;
+	padding: 10px 10px;
+	border-radius: 20px;
+}
+
+div.shop div {
+	width: 30px;
+	height: 30px;
+	border: 1px solid black;
+	border-radius: 100px;
+}
+</style>
+<script>
+  $(function(){
+    // getJson
+    $("#btn1").click(function(){
+      $.getJSON("data1.json", function(data){
+        var s = "이름:" + data.name + "<br>";
+        s+="주소:" + data.addr;
+        $("#out1").html(s);
+      });
+    });
+
+    // ajax
+    $("#btn2").click(function(){
+      $.ajax({
+        type:"get",
+        url:"data1.json",
+        dataType:"json",
+        success:function(data){
+          var s = "Name: " + data.name + "<br>";
+          s+="Address: " + data.addr;
+          $("#out1").html(s);
+        }
+      });
+    });
+
+    $("#btn3").click(function(){
+      $.ajax({
+        type:"get",
+        dataType:"json",
+        url:"data2.json",
+        success:function(data){
+          alert(data.length);
+          var s="";
+          // 데이터 갯수만큼 반복
+          $.each(data, function(i, element){
+            s+="<div class='shop'>";
+            s+="상품번호: " + (i+1) + "<br>";  
+            s+="상품명: " + element.sangpum + "<br>";  
+            s+="상품색상: <div style='background-color:" + element.color + ";'></div>";  
+            s+="상품가격: " + element.price;  
+            s+="</div>";
+          });
+          $("#out2").html(s);
+        }
+      });
+    });
+  });
+</script>
+</head>
+<body>
+
+	<b>data1.json 읽기</b>
+	<br>
+	<button type="button" class="btn btn-danger" id="btn1">getJson
+		함수로 읽기</button>
+	<button type="button" class="btn btn-danger" id="btn2">ajax
+		함수로 읽기</button>
+	<div id="out1" style="margin-top: 30px;">111</div>
+
+	<b>data2.json 읽기</b>
+	<br>
+	<button type="button" class="btn btn-info" id="btn3">ajax 함수로
+		읽기</button>
+	<div id="out2" style="margin-top: 30px;">222</div>
+
+</body>
+</html>

@@ -75,6 +75,27 @@ public class StuDao {
 			db.dbClose(pstmt, conn);
 		}
 	}
+	
+	// 삭제 메서드
+	public void deleteStudent(String num) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "delete from stu where num=?";
+		
+		conn = db.getConnection();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			// 바인딩
+			pstmt.setString(1, num);
+			// 실행
+			pstmt.execute();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			db.dbClose(pstmt, conn);
+		}
+	}
 }
 
 

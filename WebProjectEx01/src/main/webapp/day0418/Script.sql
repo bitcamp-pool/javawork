@@ -8,9 +8,6 @@ create table stu(
 );
 
 insert into stu (name, photo, hp, addr, writeday) 
-values ('이지영', '../image/09.png', '010-2345-6789', '서울 강남구', now());
-
-insert into stu (name, photo, hp, addr, writeday) 
 values ('김우빈', '../image/2.jpg', '010-1234-5678', '서울 강남구', now());
 
 insert into stu (name, photo, hp, addr, writeday) 

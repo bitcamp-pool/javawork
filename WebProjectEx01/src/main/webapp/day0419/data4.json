@@ -1,0 +1,6 @@
+{
+  "photo": ["../image/01.png", "../image/02.png", "../image/03.png"],
+  "shop":  "강남고속터미널 지하상가",
+  "loc":   "강남역",
+  "lang":  ["Java", "JSP", "Spring", "HTML5", "Mysql"]
+}

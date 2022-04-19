@@ -63,11 +63,18 @@
     	var addr = $("#addr").val();
     	var photo = $("#photo").val();
     	
+      // 사용자가 저장버튼을 연달아 클릭할 경우 예외처리
+      if(name.length==0 || hp.length==0 || addr.length==0){
+        alert("데이터를 모두 입력해 주세요")
+        return; // 함수종료
+      }
+
     	$.ajax({
     		type:"post",
     		dataType:"html", /*데이터를 리턴받지 않으므로 html*/
     		url:"studataread.jsp",
     		data:{"name":name, "hp":hp, "addr":addr, "photo":photo},
+    	    //data:"name="+name+"&hp="+ hp + "&addr=" + addr + "&photo=" +photo, <--이 방법도 됨
     		success:function(){
     			// db저장 후 다시 목록 출력
     			list();
@@ -77,10 +84,33 @@
     			$("#hp").val("");
     			$("#addr").val("");
     		}
-    	});
-    	
+    	});	
     });
-  });
+
+    // 삭제 이벤트
+    $(document).on("click", "button.del", function(){
+      // alert($(this).attr("num")); // 버튼에 있는 번호 확인하기
+      var num = $(this).attr("num");
+      var ans = confirm("삭제하려면 [확인]을 눌러주세요");
+      // console.log(ans); // 반환타입 확인(true/false)
+      if(ans){
+        // 삭제하는 코드
+        // 서버에 전송(num)
+        $.ajax({
+          type:"get",
+          dataType:"html",
+          url:"studelete.jsp",
+          data:{"num":num},
+          success:function(){
+            // 목록 다시 출력
+            list();
+            alert("삭제되었습니다.");
+          }
+        });
+      }
+    });
+
+  }); // end function
 
   // 사용자 함수(목록보기)
   function list(){
@@ -107,7 +137,12 @@
               s+="<tr><td>핸드폰:"   + d.find("hp").text()   + "</td></tr>";
               s+="<tr><td>주소  :"   + d.find("addr").text() + "</td></tr>";
               s+="<tr><td>";
-              s+="<button type='button' class='btn btn-danger btn-xs' class='del'>삭제</button>";
+
+              // num 미리 얻기 : 해당 버튼의 데이터를 삭제하려면 식별자(num)가 필요
+              // 따라서 num을 심어놓기
+              var num = d.find("num").text();
+
+              s+="<button type='button' class='btn btn-danger btn-xs del' num=" + num + ">삭제</button>";
               s+="</td></tr>";
           });
 
