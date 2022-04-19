@@ -13,18 +13,36 @@
 body * {
 	font-family: 'Jua';
 }
+th {
+	text-align: center;
+}
 </style>
 <script type="text/javascript">
 	window.onload = function() {
 		list(); // 처음 로딩시 호출
 	}
 	function list() {
-		
+		$.getJSON("stutojson.jsp", function(data){
+			var s = "<table class = 'table table-bordered' style='width:700px;'>";
+			s+="<th>번호</th><th>이름</th><th>사진</th><th>연락처</th><th>주소</th><th>등록일</th>"
+			$.each(data, function(i, e){
+				s+="<tr>";
+				s+="<td>" + e.num + "</td>"; 	
+				s+="<td>" + e.name + "</td>"; 	
+				s+="<td>" + "<img src='" + e.photo + "'width=100'></td>"; 	
+				s+="<td>" + e.hp + "</td>"; 	
+				s+="<td>" + e.addr + "</td>"; 	
+				s+="<td>" + e.writeday + "</td>"; 	
+				s+="</tr>";
+			});
+
+			$(".stu").html(s);
+		});
 	}
 </script>
 </head>
 
 <body>
-	<div class="stu"></div>
+	<div class="stu" style="text-align: center"></div>
 </body>
 </html>
