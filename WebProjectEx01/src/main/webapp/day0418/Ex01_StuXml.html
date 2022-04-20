@@ -39,13 +39,6 @@
     $("#btnshow").click(function(){
       $("div.form").toggle(); // show + hide
     });
-
-    // 포토 옵션 리스트 생성
-    opts = "";
-    for(i=1; i<=20; i++){
-    	opts += "<option value='../image/"+ i + ".jpg'>이미지 " + i + "</option>"
-    }
-    $("#photo").html(opts);
     
     // select의 첫번째 value값을 이미지 selphoto에 넣는다
     $("#selphoto").attr("src", $("#photo").val());
@@ -196,11 +189,11 @@
             <th bgcolor="pink" width="100">사진</th>
             <td>
               <select id="photo" style="width: 100px;" class="form-control">
-                <!-- <script type="text/javascript">
+                <script type="text/javascript">
                   for(i=1; i<=20; i++){
                     document.write("<option value='../image/"+ i + ".jpg'>이미지 " + i + "</option>");
                   }
-                </script> -->
+                </script>
               </select>
               <img src="" id="selphoto" width="70" height="70">
             </td>

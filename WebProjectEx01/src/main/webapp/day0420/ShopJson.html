@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<meta name="viewport" content="width=device-width; initial-scale=1.0">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>   
+<link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Jua&family=Lobster&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+ div.title {
+   border: 1px solid gray;
+   height: 50px;
+   line-height: 50px;
+   font-size: 30px;
+   font-family: 'Jua';
+   text-align: center;
+ }
+ div.inform {
+   border: 2px solid orange;
+   border-radius: 20px;
+   width: 400px;
+   height: 600px;
+   padding: 20px 20px;
+   font-size: 15px;
+   font-family: 'Nanum Pen Script';
+   margin: 20px;
+ }
+ div.list {
+   border: 2px solid orange;
+   border-radius: 20px;
+   width: 700px;
+   height: 600px;
+   padding: 20px 20px;
+   font-size: 15px;
+   font-family: 'Nanum Pen Script';
+   margin: 20px;
+ }
+ /* 반응형 css 설정 */
+ @media (max-width:500px){
+   div.title {
+     background-color: #afeeee;
+     color: black;
+   }
+   div.inform {
+     float: none;
+     width: auto;
+     border: 5px groove gold;
+   }
+   div.list {
+     float: none;
+     width: auto;
+     border: 5px dotted crimson;
+   }
+ }
+
+ @media (min-width:600px) and (max-width:2000px){
+   div.title {
+     background-color: #ffb6c1;
+     color: green;
+     font-weight: bold;
+     font-size: 35px;
+   }
+   div.inform {
+     float: left;
+     border: 5px solid orange;
+   }
+   div.list {
+     float: right;
+     border: 5px inset green;
+   }
+ }
+
+ td.cell img {
+   width: 100px;
+   height: 110px;
+   border: 2px solid gray;
+   cursor: pointer;
+ }
+ td.cell img:hover {
+   box-shadow: 5px 5px 5px gray;
+ }
+ td.cell b {
+   padding-left: 20px;
+ }
+</style>
+<script type="text/javascript">
+  window.onload=function(){
+    // 처음 시작시 목록 출력
+    list();
+
+    // 저장 버튼 이벤트
+    $("#btnsave").click(function(){
+      var fdata = $("#frm").serialize(); // 폼안의 모든 데이터를 읽어온다.
+      // alert(data);
+      $.ajax({
+        type:"get",
+        /* dataType : 서버에서 반환되는 데이터 형식(생략하면 요청한 자료에 맞게 자동으로 형식 설정)
+         * xml : XML문서
+         * html : HTML을 텍스트 데이터로, 여기에 script태그가 포함된 경우 실행 처리
+         * script : JavaScript코드를 텍스트 데이터로,
+         * json : JSON 형식 데이터로 평가
+         * text : 일반 텍스트
+         */
+        dataType:"html", // 리턴 받을게 없으므로
+        url:"ShopdataRead.jsp",
+        data:fdata,
+        success:function(){
+          // 목록 다시 출력
+          list();
+
+          // 입력값 초기화
+          $("#sangpum").val("");
+          $("#price").val("");
+          $("#cnt").val("1");
+        }
+      });
+    });
+  }
+
+  function list(){
+    $.ajax({
+      type:"get",
+      url:"ShopToJson.jsp",
+      dataType:"json",
+      success:function(data){
+        var s = "";
+        s+="<table class='table table-striped'>";
+        s+="<caption><b>총 " + $(data).length + " 개의 상품이 있습니다</b></caption>";
+        
+        // 반복문
+        s+="<tr>";
+        $.each(data, function(i, elt){
+          s+="<td class='cell'>";
+          s+="<img src='" + elt.photo + "'num=" + elt.num + ">";
+          s+="<br><b>" + elt.sangpum + "</b></br>";
+          s+="<b style='color:red'>" + elt.price + "원</b>";
+          s+="</td>";
+          if((i+1)%4==0){
+            s+="</tr><tr>";
+          }
+        });
+        s+="</tr>";  
+        s+="</table>";
+        $("div.list").html(s);
+      }
+    });
+  }
+</script>
+</head>
+
+<body>
+<div class="title">
+  Shop Design
+</div>
+<div class="inform">
+  <h2>상품등록</h2>
+  <form action="#" id="frm" class="form-inline"> <!--사진 옆으로 나오게form-inline-->
+    <table class="table table-bordered" style="width: 400px;">
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">상품명</th>
+        <td>
+          <input type="text" id="sangpum" name="sangpum" class="form-control">
+        </td>
+      </tr>
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">상품사진</th>
+        <td>
+          <select name="photo" id="photo" class="form-control" style="width: 120px;">
+            <script>
+              var data=["라운트티", "블랙원피스", "화이트원피스", "도트원피스",
+                        "블랙조끼", "꽃무늬원피스", "프릴원피스", "반팔원피스", 
+                        "레이스원피스", "블랙코드", "체크쿠션"];
+              var s = "";
+              for(i=0; i<=10; i++){
+                s+="<option value='../image2/" + (i+1) + ".jpg'>" + data[i] + "</option>";
+              }
+              document.write(s);
+            </script>
+          </select>
+          <img src="" id="myphoto" width="60" height="60">
+          <script>
+            // 1번째 사진넣기
+            $("#myphoto").attr("src", $("#photo").val()); 
+
+            // 변경시 이벤트
+            $("#photo").change(function(){
+              $("#myphoto").attr("src", $(this).val());
+            });
+          </script>
+        </td>
+      </tr>
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">색상</th>
+        <td>
+          <input type="color" id="color" name="color" class="form-control" 
+                 value="#ffcccc" style="width: 80px;">
+        </td>
+      </tr>
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">단가</th>
+        <td>
+          <input type="text" id="price" name="price" class="form-control">
+        </td>
+      </tr>
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">수량</th>
+        <td>
+          <input type="number" id="cnt" name="cnt" class="form-control"
+                 min="1" max="5" value="1">
+        </td>
+      </tr>
+      <tr>
+        <th bgcolor="pink" style="width: 100px;">입고일</th>
+        <td>
+          <input type="date" id="ipgoday" name="ipgoday" class="form-control"
+                 value="2022-04-20">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">
+          <button type="button" id="btnsave" class="btn btn-info" 
+                  style="width: 130px;">DB저장</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+<div class="list">
+  <h2>상품목록</h2>
+</div>
+</body>
+</html>
