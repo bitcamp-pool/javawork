@@ -117,8 +117,21 @@
         }
       });
     });
-  }
+    
+    // 사진 클릭시 상세페이지로 이동하는 이벤트 추가
+    $(document).on("click", "td.cell img", function(){
+      // img 태그에 있는 num 가져오기
+      var num = $(this).attr("num");
+      // alert(num);
 
+      // 요청 파일로 이동하면서 num 넘기기(get방식)
+      location.href="ShopDetailPage.jsp?num=" + num;
+      
+    });
+
+  } // window.onload END
+
+  // 출력 재사용 함수
   function list(){
     $.ajax({
       type:"get",
@@ -133,6 +146,10 @@
         s+="<tr>";
         $.each(data, function(i, elt){
           s+="<td class='cell'>";
+          /* 상세페이지 연결 또는 삭제 하려면
+           * num(식별자) 번호가 필요
+           * 따라서 num속성 부여
+           */  
           s+="<img src='" + elt.photo + "'num=" + elt.num + ">";
           s+="<br><b>" + elt.sangpum + "</b></br>";
           s+="<b style='color:red'>" + elt.price + "원</b>";
@@ -156,6 +173,9 @@
 </div>
 <div class="inform">
   <h2>상품등록</h2>
+  <!--
+    form 입력값을 직렬화 하려면 각 항목의 name 속성이 설정되어야 한다.
+  -->
   <form action="#" id="frm" class="form-inline"> <!--사진 옆으로 나오게form-inline-->
     <table class="table table-bordered" style="width: 400px;">
       <tr>

@@ -16,6 +16,7 @@
 		price = Integer.parseInt(request.getParameter("price"));
 	} catch(NumberFormatException e){
 		// 문자가 섞여 있을 경우 발생
+		System.out.println("입력값 오류");
 		price = 0;
 	}
 	
