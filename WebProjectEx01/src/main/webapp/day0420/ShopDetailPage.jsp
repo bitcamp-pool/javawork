@@ -34,16 +34,20 @@
 		$("#btndelete").click(function(){
 			var ans = confirm("삭제하려면 [확인] 버튼을 눌러주세요");
 			if(ans){
-				/* 요청 파일로 이동하면서 num 넘기기(get방식)
+				/* 요청 [파일로 이동]하면서 num 넘기기(get방식)
 				location.href="delete.jsp?num=" + $("#num").val();
 				location.href="ShopJson.html"; */
 
+				/* Ajax를 통해 서버와 클라이언트 간 JSON, TEXT, HTML, XML 등 정보를 
+				 * *** 화 면 전 환 없이!!! *** 교환
+				 */
 				$.ajax({
 					type:"get",
 					data:{"num":$("#num").val()},
-					dataType:"html",
+					// dataType:"html", // 반환값이 없는 경우 생략 가능?
 					url:"delete.jsp",
 					success:function(){
+						
 						// ShopJson.jsp로 이동(목록 갱신)
 						location.href="ShopJson.html";
 					}
