@@ -60,6 +60,34 @@ public class ShopDao {
 		}
 	}
 	
+	// 데이터 수정
+	public void shopUpdate(ShopDto dto) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "update shop set sangpum=?, color=?, price=?, cnt=?, ipgoday=?, photo=? where num=?";
+		
+		conn = db.getConnection();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			// 바인딩
+			pstmt.setString(1, dto.getSangpum());
+			pstmt.setString(2, dto.getColor());
+			pstmt.setInt(3, dto.getPrice());
+			pstmt.setInt(4, dto.getCnt());
+			pstmt.setString(5, dto.getIpgoday());
+			pstmt.setString(6, dto.getPhoto());
+			pstmt.setString(7, dto.getNum());
+			// 실행
+			pstmt.execute();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			db.dbClose(pstmt, conn);
+		}
+	}
+	
+	
 	// 데이터 조회
 	public List<ShopDto> getSangpumList(){
 		List<ShopDto> list = new Vector<ShopDto>();

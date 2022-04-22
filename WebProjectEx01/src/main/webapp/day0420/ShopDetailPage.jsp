@@ -55,12 +55,42 @@
 			}
 		});
 
-		// 부트스트랩 js모달
 		// 수정 버튼 이벤트
 		$("#btnupdate").click(function(){
+			$.ajax({
+				type:"get",
+				dataType:"json",
+				url:"DetailJson.jsp",
+				data:{"num":$("#num").val()},
+				success:function(data){
+					$("#usangpum").val(data.sangpum);
+					$("#uprice").val(data.price);
+					$("#ucnt").val(data.cnt);
+					$("#uphoto").val(data.photo);
+					$("#umyphoto").attr("src", data.photo);
+					$("#uipgoday").val(data.ipgoday);
+					$("#ucolor").val(data.color);
+				}
+			});
 			$("#myModal").modal();
 		});
 
+		// 부트스트랩 js모달
+		// DB 수정 이벤트
+		$("#ubtnupdate").click(function(){
+			// 전체 폼데이터 읽기
+			var fdata = $("#ufrm").serialize();
+			// alert(fdata);
+			$.ajax({
+				type:"post",
+				dataType:"html",
+				url:"update.jsp",
+				data:fdata,
+				success:function(){
+					location.reload(); // 새로고침
+				}
+			});
+		});
 
 
   } // onload END
@@ -137,12 +167,12 @@
         <div class="modal-body">
           <!--수정 폼 넣기-->
 					<form action="#" id="ufrm" class="form-inline"> <!--사진 옆으로 나오게form-inline-->
-						<input type="hidden" id="unum" value="<%=num%>">
+						<input type="hidden" id="unum" name="unum" value="<%=num%>">
 						<table class="table table-bordered" style="width: 400px;">
 							<tr>
 								<th bgcolor="pink" style="width: 100px;">상품명</th>
 								<td>
-									<input type="text" id="sangpum" name="usangpum" class="form-control">
+									<input type="text" id="usangpum" name="usangpum" class="form-control">
 								</td>
 							</tr>
 							<tr>
