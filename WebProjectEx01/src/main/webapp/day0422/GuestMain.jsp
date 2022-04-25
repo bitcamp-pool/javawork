@@ -51,11 +51,24 @@
 		border: 2px solid black;
 		box-show: 3px 3px 3px gray;
 	}
+	span.mod, span.del {
+		margin-left: 10px;
+		cursor: pointer;
+	}
+	span.day {
+		float: right;
+		color: #999;
+		font-size: 13px;
+	}
+	img.avata {
+		width: 30px;
+	}
 </style>
 <script type="text/javascript">
 	$(function() {
 		// 시작 시 목록 출력
-		list(); 
+		list();
+		
 		// 저장 이벤트
 		$(".btnsave").click(function(){
 			// 폼 전체 데이터를 읽어서 inster.jsp로 보낸다
@@ -74,23 +87,107 @@
 					$("#content").val("");
 					
 					$("#avata").val("1");
-					$("img.imgphoto:first").removeClass("select");
+					$("img.imgphoto").removeClass("select");
 					$("img.imgphoto:first").addClass("select");
 				}
 			});
-		});
-	});
+		}); // 저장
+		
+		// 수정 이벤트
+		 $(document).on("click", "span.mod", function(){
+			var num = $(this).attr("num");
+			
+			// 비번은 입력 프롬프트
+			var pass = prompt("이 글에 대한 비밀번호를 입력해주세요");
+			console.log(num + ", " + pass);
+			
+			// 취소 클릭하거나 비번을 입력 안했을 경우 함수 종료
+			if(pass==null || pass.length==0){
+				return;
+			}
+			
+			$.ajax({
+				type:"get",
+				dataType:"json",
+				data:{"num":num, "pass":pass},
+				url:"equalpass.jsp",
+				success: function(data){
+					if(data.result=='true'){
+						// 비번이 맞으면 수정  Form 으로 이동
+						location.href='updateForm.jsp?num='+num;
+					} else {
+						alert("비밀번호가 일치하지 않습니다");
+					}
+				}
+			});
+		 }); // 수정
+		
+		// 삭제 이벤트
+		 $(document).on("click", "span.del", function(){
+			var num = $(this).attr("num");
+			
+			// 비번은 입력 프롬프트
+			var pass = prompt("이 글에 대한 비밀번호를 입력해주세요");
+			console.log(num + ", " + pass);
+			
+			// 취소 클릭하거나 비번을 입력 안했을 경우 함수 종료
+			if(pass==null || pass.length==0){
+				return;
+			}
+			
+			$.ajax({
+				type:"get",
+				dataType:"json",
+				data:{"num":num, "pass":pass},
+				url:"delete.jsp",
+				success: function(data){
+					if(data.result=='true'){
+						alert("삭제되었습니다");
+						// 새로고침
+						location.reload(); 
+					} else {
+						alert("비밀번호가 일치하지 않습니다");
+					}
+				}
+			});
+		 }); // 삭제
+		 
+	}); // DOM onload
 	
+	
+
+	
+	// 방명록 조회
 	function list() {
 		$.ajax({
-			method:"get",
-			url:"list.jsp",
+			type:"get",
 			dataType:"json",
+			url:"list.jsp",
 			success:function(data){
+				var s="";
 				
+				$.each(data, function (i, elt) {
+					s+= "<table class='table'>";
+					
+					s+= "<tr><td>";
+					s+="<b>" +  elt.writer + "</b>";
+					s+="<span class = 'mod' num=" + elt.num + ">수정</span>";
+					s+="<span class = 'del' num=" + elt.num + ">삭제</span>";
+					s+="<span class = 'day'>" + elt.writeday + "</span>";
+					s+="</td></tr>";
+					
+					s+="<tr><td>";
+					s+="<img src='../avata/s" + elt.avata + ".JPG' class='avata' align=left hspace=20>";
+					s+="<pre>" + elt.content + "</pre>";
+					s+="</td></tr>";
+					
+					s+="</table><br><br>";
+				});
+				
+				$("div.list").html(s);
 			}
 		});
-	}
+	} // 조회
 </script>
 </head>
 <body>
@@ -120,7 +217,7 @@
 	  		</tr>
 	  		<tr>
 	  			<td>
-	  				<!-- 아래태그는 브라우저로 선택한 아바타의 번호가 정상적으로 출력 확인 후 hidden으로 바꾼다 -->
+	  				<!-- 아래 태그는 브라우저로 선택한 아바타의 번호가 정상적으로 출력 확인 후 hidden으로 바꾼다 -->
 	  				<!-- <input type="text" id="avata" name="avata" value="1"><br>  -->
 	  				<input type="hidden" id="avata" name="avata" value="1"><br>
 	  				<%
