@@ -1,13 +1,14 @@
 package spring.text.bit;
 
-import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -17,23 +18,56 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class HomeController {
 	
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
-		logger.info("Welcome home! The client locale is {}.", locale);
+	@RequestMapping(value="/", method = RequestMethod.GET)// spring4까지
+	public String test1(Model model, HttpSession session) {
 		
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		// request 영역에 저장
+		model.addAttribute("message", "Spring Framework Start!!!");
 		
-		String formattedDate = dateFormat.format(date);
-		
-		model.addAttribute("serverTime", formattedDate );
-		
-		return "home";
+		// session 영역에 저장
+		session.setAttribute("myid", "angle");
+				
+		return "result1";
 	}
 	
+	@GetMapping("/form") // spring5 버전부터
+	public String goForm(){
+		return "form";
+	}
+	
+	@GetMapping("/happy")
+	public String goNice(Model model) {
+		model.addAttribute("today", new Date());
+		return "nice";
+	}
+	
+	@GetMapping("/for")
+	public String goFor(Model model) {
+		
+		List<String> list = new Vector<String>();
+		
+		list.add("red");
+		list.add("green");
+		list.add("orange");
+		list.add("pink");
+		list.add("blue");
+		list.add("black");
+		list.add("gray");
+		list.add("magenta");
+		
+		model.addAttribute("flowers", list);
+		
+		return "list";
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
