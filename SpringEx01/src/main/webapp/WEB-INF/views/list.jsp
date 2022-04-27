@@ -48,11 +48,36 @@
 				<td bgcolor="${s}">${s}</td>
 			</tr>
 		</c:forEach>
-		
 	</table>
 	
-	
-	
+	<h2>인덱스 2~4 까지만 출력하기</h2>
+	<table class="table table-bordered" style="width:300px">
+		<tr bgcolor="#ddd">
+			<th>index</th><th>count</th><th>value</th>
+		</tr>
+		
+		<c:forEach var="s" items="${flowers}" begin="2" end="4" varStatus="i">
+			<tr>
+				<td>${i.index}</td>
+				<td>${i.count}</td>
+				<td bgcolor="${s}">${s}</td>
+			</tr>
+		</c:forEach>
+	</table>	
+	<h2>인덱스 1~3 까지만 출력하기</h2>
+	<table class="table table-bordered" style="width:300px">
+		<tr bgcolor="#ddd">
+			<th>index</th><th>count</th><th>value</th>
+		</tr>
+		
+		<c:forEach var="s" items="${flowers}" begin="1" end="3" varStatus="i">
+			<tr>
+				<td>${i.index}</td>
+				<td>${i.count}</td>
+				<td bgcolor="${s}">${s}</td>
+			</tr>
+		</c:forEach>
+	</table>	
 	
 	
 	

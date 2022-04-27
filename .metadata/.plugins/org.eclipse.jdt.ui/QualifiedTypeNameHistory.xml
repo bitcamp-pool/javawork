@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-    <fullyQualifiedTypeName name="day0405.ChildA"/>
-    <fullyQualifiedTypeName name="day0405.Add"/>
-    <fullyQualifiedTypeName name="day0405.Update"/>
     <fullyQualifiedTypeName name="day0405.Delete"/>
     <fullyQualifiedTypeName name="day0405.List"/>
     <fullyQualifiedTypeName name="day0405.InterA"/>
@@ -18,11 +15,9 @@
     <fullyQualifiedTypeName name="day0406.InterAnony"/>
     <fullyQualifiedTypeName name="day0406.Ex06AnonymousClass"/>
     <fullyQualifiedTypeName name="java.lang.ArrayIndexOutOfBoundsException"/>
-    <fullyQualifiedTypeName name="java.util.Date"/>
     <fullyQualifiedTypeName name="day0406.UserException"/>
     <fullyQualifiedTypeName name="day0406.ScoreException"/>
     <fullyQualifiedTypeName name="java.io.IOException"/>
-    <fullyQualifiedTypeName name="java.util.List"/>
     <fullyQualifiedTypeName name="java.util.ArrayList"/>
     <fullyQualifiedTypeName name="java.lang.NumberFormatException"/>
     <fullyQualifiedTypeName name="java.io.Serializable"/>
@@ -57,7 +52,12 @@
     <fullyQualifiedTypeName name="mysql.data.DbConnect"/>
     <fullyQualifiedTypeName name="java.sql.Connection"/>
     <fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
-    <fullyQualifiedTypeName name="java.util.Vector"/>
     <fullyQualifiedTypeName name="java.sql.ResultSet"/>
     <fullyQualifiedTypeName name="mysql.data.ShopDto"/>
+    <fullyQualifiedTypeName name="javax.servlet.http.HttpSession"/>
+    <fullyQualifiedTypeName name="org.springframework.ui.Model"/>
+    <fullyQualifiedTypeName name="java.util.Date"/>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.GetMapping"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="java.util.Vector"/>
 </qualifiedTypeNameHistroy>

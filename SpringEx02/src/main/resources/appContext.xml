@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Namespaces 탭 에서 항목 설정 가능  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+	<!-- 디폴트가 scope="singleton" -->
+	<bean id="hello" class="study1.Hello" />
+	
+	<bean id="score" class="study2.Score">
+		<!-- constructor 주입 -->
+		<constructor-arg value="100"></constructor-arg>
+		<!-- setter 주입 -->
+		<property name="eng" value="89"/>
+		<property name="mat">
+			<value>80</value>
+		</property>
+	</bean>
+	
+	<bean id="stu" class="study2.Student">
+		<constructor-arg ref="score"/>
+		<property name="name" value="이영자"/>
+		<property name="age"  value="30"/>
+	</bean>
+	
+</beans>

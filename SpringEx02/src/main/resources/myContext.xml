@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<bean id="person" class="study3.Person">
+		<!-- 생성자 주입<list> -->
+		<constructor-arg>
+			<list>
+				<value>낚시</value>
+				<value>게임</value>
+				<value>여행</value>
+				<value>음악감상</value>
+			</list>
+		</constructor-arg>
+		<property name="address">
+			<value>서울시 강남구</value>
+		</property>
+	</bean>
+	
+	<bean id="person2" class="study3.Person">
+		<!-- 생성자 주입<list> -->
+		<constructor-arg>
+			<list>
+				<value>하와이 여행</value>
+				<value>미국여행</value>
+				<value>태국여행</value>
+				<value>캐나다여행</value>
+			</list>
+		</constructor-arg>
+		<property name="address">
+			<value>제주시 애월읍</value>
+		</property>
+	</bean>
+	
+	<!-- context 어노테이션 인식이 필요  -->
+	<!-- <bean class="study3.ApplicationConfig"/> -->
+	<!-- <context:annotation-config/> -->
+	
+	<!-- component-scan : 와일드카드(*) 가능, 여러 패키지일 경우 , 로 추가 -->
+	<context:component-scan base-package="study3"/>
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
