@@ -68,7 +68,6 @@ public class Ex01_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e2) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -125,7 +124,6 @@ public class Ex01_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 		

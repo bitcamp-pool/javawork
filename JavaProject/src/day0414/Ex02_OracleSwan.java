@@ -68,7 +68,6 @@ public class Ex02_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e2) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -103,7 +102,6 @@ public class Ex02_OracleSwan {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
@@ -111,7 +109,6 @@ public class Ex02_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -145,7 +142,6 @@ public class Ex02_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -202,7 +198,6 @@ public class Ex02_OracleSwan {
 				if(stmt != null) stmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 		

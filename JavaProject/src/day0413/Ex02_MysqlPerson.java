@@ -86,7 +86,6 @@ public class Ex02_MysqlPerson {
 				if(pstmt != null) pstmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e2) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -117,13 +116,11 @@ public class Ex02_MysqlPerson {
 				System.out.println("총 " + n + "명의 " + name + "님이 삭제되었습니다");
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 		} finally {
 			try {
 				if(pstmt != null) pstmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 		
@@ -162,7 +159,6 @@ public class Ex02_MysqlPerson {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
@@ -170,7 +166,6 @@ public class Ex02_MysqlPerson {
 				if(pstmt != null) pstmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 	}
@@ -205,14 +200,12 @@ public class Ex02_MysqlPerson {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 		} finally {
 			try {
 				if(rs != null) rs.close();
 				if(pstmt != null) pstmt.close();
 				if(conn != null) conn.close();
 			} catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 	}

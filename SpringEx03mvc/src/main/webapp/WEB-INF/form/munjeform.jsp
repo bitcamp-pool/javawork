@@ -41,10 +41,10 @@
 				<th width="100" bgcolor="#ddd">사진</th>
 				<td>
 					<select name="photo" class="form-control">
-						<option value="../image/1.jpg">사진1</option>	   
-						<option value="../image/3.jpg">사진3</option>	   
-						<option value="../image/6.jpg">사진6</option>	   
-						<option value="../image/9.jpg">사진9</option>	   
+						<option value="image/1.jpg">사진1</option>	   
+						<option value="image/3.jpg">사진3</option>	   
+						<option value="image/6.jpg">사진6</option>	   
+						<option value="image/9.jpg">사진9</option>	   
 					</select>	   
 				</td>
 			</tr>			
@@ -52,7 +52,7 @@
 				<th width="100" bgcolor="#ddd">자바</th>
 				<td>
 					<input type="text" name="java" class="form-control"
-						required="required">
+						   required="required">
 				</td>
 			</tr>
 			<tr>

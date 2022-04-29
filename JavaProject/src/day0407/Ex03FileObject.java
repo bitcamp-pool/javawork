@@ -91,7 +91,6 @@ public class Ex03FileObject {
 				if(ois!=null) ois.close();
 				if(fis!=null) fis.close();
 			} catch (Exception e2) {
-				// TODO: handle exception
 			}
 		}
 	}
