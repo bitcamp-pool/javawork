@@ -1,0 +1,39 @@
+스프링 JPA(Java Persistence API)
+   : 스프링에서데이타를처리할수있도록돕는라이브러리이다
+  데이타베이스에종속적인 SQL문없이도개발이가능하기때문에개발의생산성을높일수있다
+	기존의 JDBC 등을이용해서직접구현했던 데이타베이스관련작업을대신처리해주는추상화된계층의구현스펙이다
+
+#server port
+server.port=9001
+#jsp
+spring.mvc.view.prefix=/WEB-INF/board/
+spring.mvc.view.suffix=.jsp
+spring.devtools.livereload.enabled=true
+
+#mysql setting
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/bitcamp?serverTimezone=Asia/Seoul
+spring.datasource.username=angel
+spring.datasource.password=1234
+
+#JPA setting
+
+#스키마생성 create:기존테이블을 삭제후 생성,update: 변경된 부분만 반영
+spring.jpa.hibernate.ddl-auto=update
+#ddl 생성시 데이타베이스 고유의 기능을 사용할것인가
+spring.jpa.generate-ddl=true
+#api 호출시 실행되는 sql문을 콘솔에 보여줄것인가
+spring.jpa.show-sql=true
+#사용할 데이타베이스 종류
+spring.jpa.database=mysql
+#mysql 상세지정
+spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
+
+
+엔티티?
+JPA에서는 엔티티는 테이블에 대응하는 하나의 클래스라고 생각하면 된다
+spring-boot-starter-data-jpa 의존성을 추가하고 @Entiy 어노테이션을 붙이면 테이블과 자바 클래스가 매핑이 됩니다.
+그래서 JPA에서 '하나의 엔티티 타입을 생성한다'라는 의미는 '하나의 클래스를' 작성한다는 의미가 됩니다.
+엔티티라는 용어는 때로는 클래스를 의미하는 경우도 있고, 클래스에 의해 생성된 인스턴스를 의미하는 경우가 있습니다.
+정확히 얘기 하자면, 엔티티클래스 와 엔티티인스턴스 혹은 엔티티객체라는 표현이 정확합니다.
+
