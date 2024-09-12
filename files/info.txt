@@ -75,3 +75,114 @@ RECTANGLE 0x7b layer 18 datatype 0 width 54510 height 81760 x 20240 y
         120440 									
 RECTANGLE 0x78 width 12410 height 5840 x 64070 y 93330 																
 END none									
+
+
+----------------------------------------------------------------------------------------------------------
+
+
+START "1.0" 1000.0 1
+
+CELL 0							
+CBLOCK 0 50 55							
+PLACEMENT 0xf8 refnum 1 x 20700 y 24660	rep 3 2 24230							
+PLACEMENT 0xf0 refnum 2 x 68510 y 5470							
+RECTANGLE 0x7b layer 18 datatype 0 width 12410 height 5840 x 64070 y 
+        93330							
+RECTANGLE 0x78 width 54510 height 81760 x 20240 y 120440 							
+END_CBLOCK							
+							
+CELL 1							
+CBLOCK 0 70 75							
+PLACEMENT 0xf8 refnum 3 x 3020 y 6620 rep 2 0 7600							
+PLACEMENT 0x38 x 28880 y 6340 rep 10 0 (-8870,40)
+PLACEMENT 0xf0 refnum 4 x 4720 y -6820
+RECTANGLE 0x7b layer 18 datatype 0 width 24640 height 11000 x 9520 y 
+        -12280													
+POLYGON 0x38 x 36490 y -12200 ptlist 0 6 9730 4300 -5430 14270 5430 5340							
+END_CBLOCK							
+							
+CELL 2							
+CBLOCK 0 65 70							
+PLACEMENT 0xf8 refnum 7 x 339670 y 17560 rep 10 0 (-580, 101930)							
+PLACEMENT 0xf0 refnum 5 x 8630 y 17710							
+PLACEMENT 0xf0 refnum 6 x 192660 y 104570							
+RECTANGLE 0x7b layer 18 datatype 0 width 46020 height 22400 x 70630 y 
+	41190							
+RECTANGLE 0x79 layer 20 width 241680 height 133940 x 227780 y 64070							
+END_CBLOCK							
+							
+CELL 3							
+CBLOCK 0 22 24							
+POLYGON 0x3b layer 18 datatype 0 x -2360 y -6240 ptlist 0 6 4990 1730 
+	2610 7430 -2540 1690                                                                                                   	END_CBLOCK							
+ 							
+CELL 4							
+CBLOCK 0 30 33							
+POLYGON 0x3b layer 18 datatype 0 x -4090 y -5700 ptlist 0 10 7230 1940 
+        -5090 2030 5050 2780 -4980 2680 4780 1830							
+END_CBLOCK							
+							
+CELL 5							
+CBLOCK 0 88 93							
+PLACEMENT 0xf8 refnum 3 x 8660 y 83510 rep 11 1 10  (1126, 19) (1107, 0)							
+PLACEMENT 0xf8 refnum 8 x 44450 y 77980 rep 2 1 6100							
+PLACEMENT 0xf2 refnum 7 angle 90 x 193230 y -11870							
+PLACEMENT 0x30 x 290 y 540							
+POLYGON 0x3b layer 18 datatype 0 x 8620 y 102020 ptlist 0 10 21570 8950 
+	97310 14730 -96790 14200 102580 -36300 18930 72590							
+END_CBLOCK							
+							
+CELL 6							
+CBLOCK 0 14 16							
+PLACEMENT 0xf8 refnum 9 x 4160 y 3740 rep 1 3 3 3000 10000							
+END_CBLOCK							
+							
+CELL 7							
+CBLOCK 0 84 89							
+PLACEMENT 0xf8 refnum 1 x 48730 y 420 rep 11 1 10 (-4905, 6) (6053, 6323)							
+PLACEMENT 0x34 angle 180 x 112550 y 41300							
+RECTANGLE 0x7b layer 18 datatype 0 width 68950 height 7390 x 110 y 12450							
+POLYGON 0x38 x 1040 y 23260 ptlist 0 14 47510 6160 7250 7980 -6890 7620							
+        -20310 7610 19590 5800 8340 7980 -7620 8340							
+END_CBLOCK							
+							
+CELL 8							
+CBLOCK 0 26 29							
+POLYGON 0x3b layer 18 datatype 0 x 330 y 480 ptlist 0 8 2000 1900 1630							
+	2440 -1530 2100 4000 2410							
+END_CBLOCK							
+							
+CELL 9							
+CBLOCK 0 12 14							
+RECTANGLE 0x7b layer 18 datatype 0 width 1760 height 8300 x -3030 y -3250							
+END_CBLOCK							
+							
+PROPNAME_TABLE							
+PROPNAME "S_CELL_OFFSET" 0							
+PROPNAME "S_GDS_PROPERTY" 1							
+PROPNAME "S_BOUNDING_BOX" 2							
+							
+CELLNAME_TABLE							
+CELLNAME "TOP" 0							
+PROPERTY 0x17 refnum 0 standard values 1 8 28							
+CELLNAME "C" 1							
+PROPERTY 0x17 refnum 0 standard values 1 8 107							
+CELLNAME "COUNTINST" 2							
+PROPERTY 0x17 refnum 0 standard values 1 8 206							
+CELLNAME "D" 3							
+PROPERTY 0x17 refnum 0 standard values 1 8 300							
+CELLNAME "E" 4							
+PROPERTY 0x17 refnum 0 standard values 1 8 348							
+CELLNAME "A" 5							
+PROPERTY 0x17 refnum 0 standard values 1 8 405							
+CELLNAME "BARARY" 6							
+PROPERTY 0x17 refnum 0 standard values 1 8 522							
+CELLNAME "B" 7							
+PROPERTY 0x17 refnum 0 standard values 1 8 562							
+CELLNAME "F" 8							
+PROPERTY 0x17 refnum 0 standard values 1 8 675							
+CELLNAME "BAR" 9							
+PROPERTY 0x17 refnum 0 standard values 1 8 728							
+END 1 816 1 0 1 766 1 0 1 0 1 0 none	
+
+
