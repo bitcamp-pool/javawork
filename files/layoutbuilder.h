@@ -1,4 +1,3 @@
-​
 #ifndef OASIS_LAYOUTBUILDER_H
 #define OASIS_LAYOUTBUILDER_H
 
@@ -25,96 +24,108 @@ using SoftJin::Ulong;
 using SoftJin::HashMap;
 using SoftJin::HashPointer;
 
+// Shape 정의
 class JShape {
 public:
-  virtual void generateBinary(OasisBuilder& builder) const = 0;
-  virtual ~JShape() = default;
+    virtual void generateBinary(OasisBuilder& builder) const = 0;
+    virtual ~JShape() = default;
 };
 
 class JRectangle : public JShape {
 public:
-  JRectangle(long x, long y, long width, long height, Ulong layer, Ulong datatype, const Repetition* rep);
-  void generateBinary(OasisBuilder& builder) const override;
+    JRectangle(long x, long y, long width, long height, Ulong layer, Ulong datatype, const Repetition* rep);
+    void generateBinary(OasisBuilder& builder) const override;
 
 private:
-  long x, y, width, height;
-  Ulong layer, datatype;
-  const Repetition* rep;
+    long x, y, width, height;
+    Ulong layer, datatype;
+    const Repetition* rep;
 };
 
 class JPolygon : public JShape {
 public:
-  JPolygon(long x, long y, Ulong layer, Ulong datatype, const PointList& points, const Repetition* rep);
-  void generateBinary(OasisBuilder& builder) const override;
+    JPolygon(long x, long y, Ulong layer, Ulong datatype, const PointList& points, const Repetition* rep);
+    void generateBinary(OasisBuilder& builder) const override;
 
 private:
-  long x, y;
-  Ulong layer, datatype;
-  const Repetition* rep;
-  PointList points;
+    long x, y;
+    Ulong layer, datatype;
+    const Repetition* rep;
+    PointList points;
 };
 
+// Placement 정의
 class JPlacement {
 public:
-  JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep);
-  void generateBinary(OasisBuilder& builder) const;
+    JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep);
+    void generateBinary(OasisBuilder& builder) const;
 
 private:
-  CellName* cellName;
-  long x, y;
-  Oreal mag, angle;
-  bool flip;
-  const Repetition* rep;
+    CellName* cellName;
+    long x, y;
+    Oreal mag, angle;
+    bool flip;
+    const Repetition* rep;
 };
 
+// Cell 정의
 class JCell {
 public:
-  explicit JCell(CellName* name);
+    explicit JCell(CellName* name);
 
-  void addShape(std::unique_ptr<JShape> shape);
-  void addPlacement(std::unique_ptr<JPlacement> placement);
-  void addParent(JCell* parent);
-  void addChild(JCell* child);
-  CellName* getName() const;
-  void generateBinary(OasisBuilder& builder) const;
+    void addShape(std::unique_ptr<JShape> shape);
+    void addPlacement(std::unique_ptr<JPlacement> placement);
+    void addParent(JCell* parent);
+    void addChild(JCell* child);
+    CellName* getName() const;
+    void generateBinary(OasisBuilder& builder) const;
 
-  JCell* parent = nullptr;
+    JCell* parent = nullptr;
 
 private:
-  CellName* name;
-  std::vector<std::unique_ptr<JShape>> shapes;
-  std::vector<std::unique_ptr<JPlacement>> placements;
-  std::unordered_set<JCell*> children;
+    CellName* name;
+    std::vector<std::unique_ptr<JShape>> shapes;
+    std::vector<std::unique_ptr<JPlacement>> placements;
+    std::unordered_set<JCell*> children;
 };
 
+// CellHierarchy 정의
 class JCellsHierarchy {
 public:
-  void addChild(CellName* parent, CellName* child, std::unordered_map<CellName*, std::unique_ptr<JCell>>& cells);
-  void generateBinary(OasisBuilder& builder, const std::unordered_map<CellName*, std::unique_ptr<JCell>>& cells);
+    void addChild(CellName* parent, CellName* child, std::unordered_map<CellName*, std::unique_ptr<JCell>>& cells);
+    void generateBinary(OasisBuilder& builder, const std::unordered_map<CellName*, std::unique_ptr<JCell>>& cells);
 
 private:
-  std::unordered_map<CellName*, JCell*> hierarchy;
+    std::unordered_map<CellName*, JCell*> hierarchy;
 };
 
+// LayoutBuilder 정의
 class JLayoutBuilder : public OasisBuilder {
 public:
-  explicit JLayoutBuilder(OasisBuilder& builder);
-  void beginCell(CellName* cellName) override;
-  void endCell() override;
-  void beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) override;
-  void beginPolygon(Ulong layer, Ulong datatype, long x, long y, const PointList& points, const Repetition* rep) override;
-  void beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) override;
-  void addChildToHierarchy(CellName* parent, CellName* child);
-  void generateBinary();
+    explicit JLayoutBuilder(OasisBuilder& builder);
+
+    void beginFile(const string& version, const Oreal& unit, Validation::Scheme valScheme) override;
+    void beginCell(CellName* cellName) override;
+    void endCell() override;
+    void beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) override;
+    void beginPolygon(Ulong layer, Ulong datatype, long x, long y, const PointList& points, const Repetition* rep) override;
+    void beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) override;
+    void addChildToHierarchy(CellName* parent, CellName* child);
+    JCell* findRootCell(CellName* cellName) const;
+    void generateBinary();
 
 private:
-  OasisBuilder& builder;
-  std::unordered_map<CellName*, std::unique_ptr<JCell>> cells;
-  JCell* currentCell = nullptr;
-  JCellsHierarchy cellHierarchy;
+    OasisBuilder& builder;
+
+    std::string fileVersion;
+    Oreal fileUnit;
+    Validation::Scheme fileValidationScheme;
+
+    std::unordered_map<CellName*, std::unique_ptr<JCell>> cells;
+    JCell* currentCell = nullptr;
+    JCellsHierarchy cellHierarchy;
 };
 
 }
 
 #endif // OASIS_LAYOUTBUILDER_H
-
