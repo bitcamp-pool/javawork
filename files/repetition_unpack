@@ -1,0 +1,63 @@
+#include <vector>
+#include <iostream>
+
+struct Point {
+    long x, y;
+};
+
+struct Repetition {
+    enum Type {
+        Rep_UniformX, Rep_UniformY, Rep_Matrix
+        // 추가 타입 가능
+    };
+
+    Type repType;
+    long xSpace, ySpace;
+    int xCount, yCount;
+
+    Repetition(Type type, long xs, long ys, int xc, int yc)
+        : repType(type), xSpace(xs), ySpace(ys), xCount(xc), yCount(yc) {}
+};
+
+std::vector<Point> unpackRepetition(const Point& origin, const Repetition& rep) {
+    std::vector<Point> points;
+
+    switch (rep.repType) {
+        case Repetition::Rep_UniformX:
+            for (int i = 0; i < rep.xCount; ++i) {
+                points.push_back({origin.x + i * rep.xSpace, origin.y});
+            }
+            break;
+
+        case Repetition::Rep_UniformY:
+            for (int i = 0; i < rep.yCount; ++i) {
+                points.push_back({origin.x, origin.y + i * rep.ySpace});
+            }
+            break;
+
+        case Repetition::Rep_Matrix:
+            for (int i = 0; i < rep.xCount; ++i) {
+                for (int j = 0; j < rep.yCount; ++j) {
+                    points.push_back({origin.x + i * rep.xSpace, origin.y + j * rep.ySpace});
+                }
+            }
+            break;
+
+        // 다른 반복 타입 추가 가능
+    }
+
+    return points;
+}
+
+int main() {
+    Point origin = {0, 0};
+    Repetition matrixRep(Repetition::Rep_Matrix, 10, 20, 3, 2);
+
+    std::vector<Point> points = unpackRepetition(origin, matrixRep);
+
+    for (const auto& pt : points) {
+        std::cout << "Point: (" << pt.x << ", " << pt.y << ")\n";
+    }
+
+    return 0;
+}
