@@ -9,8 +9,8 @@ BBox JRectangle::getBBox() const {
     return bbox;
 }
 
-void JRectangle::generateBinary(OasisBuilder& builder) const {
-    builder.beginRectangle(0, 0, x, y, width, height, rep); // Layer/datatype values assumed as placeholders
+void JRectangle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginRectangle(layer, datatype, x, y, width, height, rep); // Layer/datatype values assumed as placeholders
 }
 
 // JSquare Implementation
@@ -20,8 +20,8 @@ BBox JSquare::getBBox() const {
     return bbox;
 }
 
-void JSquare::generateBinary(OasisBuilder& builder) const {
-    builder.beginRectangle(0, 0, x, y, width, width, rep); // Placeholder values
+void JSquare::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginRectangle(layer, datatype, x, y, width, width, rep); // Placeholder values
 }
 
 // JPolygon Implementation
@@ -38,8 +38,8 @@ BBox JPolygon::getBBox() const {
     return {x_min, y_min, x_max, y_max};
 }
 
-void JPolygon::generateBinary(OasisBuilder& builder) const {
-    builder.beginPolygon(0, 0, x, y, points, rep); // Placeholder values
+void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginPolygon(layer, datatype, x, y, points, rep); // Placeholder values
 }
 
 
@@ -56,8 +56,8 @@ BBox JPath::getBBox() const {
     return {x_min, y_min, x_max, y_max};
 }
 
-void JPath::generateBinary(OasisBuilder& builder) const {
-    builder.beginPath(0, 0, x, y, halfwidth, startExtn, endExtn, points, rep); // Placeholder values
+void JPath::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginPath(layer, datatype, x, y, halfwidth, startExtn, endExtn, points, rep); // Placeholder values
 }
 
 // JTrapezoid Implementation
@@ -68,8 +68,8 @@ BBox JTrapezoid::getBBox() const {
     return {x_min, y_min, x_max, y_max};
 }
 
-void JTrapezoid::generateBinary(OasisBuilder& builder) const {
-    builder.beginTrapezoid(0, 0, x, y, trapezoid, rep); // Placeholder values
+void JTrapezoid::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginTrapezoid(layer, datatype, x, y, trapezoid, rep); // Placeholder values
 }
 
 // JCircle Implementation
@@ -79,8 +79,8 @@ BBox JCircle::getBBox() const {
     return bbox;
 }
 
-void JCircle::generateBinary(OasisBuilder& builder) const {
-    builder.beginCircle(0, 0, x, y, radius, rep); // Placeholder values
+void JCircle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginCircle(layer, datatype, x, y, radius, rep); // Placeholder values
 }
 
 // JText Implementation
@@ -92,8 +92,8 @@ BBox JText::getBBox() const {
     return bbox;
 }
 
-void JText::generateBinary(OasisBuilder& builder) const {
-    builder.beginText(0, 0, x, y, text, rep); // Placeholder values
+void JText::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    creator.beginText(layer, datatype, x, y, text, rep); // Placeholder values
 }
 
 
@@ -102,8 +102,8 @@ void JText::generateBinary(OasisBuilder& builder) const {
 JPlacement::JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep)
     : cellName(cellName), x(x), y(y), mag(mag), angle(angle), flip(flip), rep(rep) {}
 
-void JPlacement::generateBinary(OasisBuilder& builder) const {
-    builder.beginPlacement(cellName, x, y, mag, angle, flip, rep);
+void JPlacement::generateBinary(OasisBuilder& creator) const {
+    creator.beginPlacement(cellName, x, y, mag, angle, flip, rep);
 }
 
 // JCell Implementation
@@ -131,31 +131,34 @@ CellName* JCell::getName() const {
     return name;
 }
 
-void JCell::generateBinary(OasisBuilder& builder) const {
+void JCell::generateBinary(OasisBuilder& creator) const {
     // Generate shapes
     for (const auto& pair : shapesByLayer) {
         for (const auto& shape : pair.second) {
+            Ulong layer     = pair.first.layer;
+            Ulong datatype  = pair.first.datatype;
+
             switch (shape->getShapeType()) {
             case JShape::Rectangle:
-                static_cast<JRectangle*>(shape.get())->generateBinary(builder);
+                static_cast<JRectangle*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Square:
-                static_cast<JSquare*>(shape.get())->generateBinary(builder);
+                static_cast<JSquare*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Polygon:
-                static_cast<JPolygon*>(shape.get())->generateBinary(builder);
+                static_cast<JPolygon*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Path:
-                static_cast<JPath*>(shape.get())->generateBinary(builder);
+                static_cast<JPath*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Trapezoid:
-                static_cast<JTrapezoid*>(shape.get())->generateBinary(builder);
+                static_cast<JTrapezoid*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Circle:
-                static_cast<JCircle*>(shape.get())->generateBinary(builder);
+                static_cast<JCircle*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             case JShape::Text:
-                static_cast<JText*>(shape.get())->generateBinary(builder);
+                static_cast<JText*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             default:
                 throw std::runtime_error("Unknown shape type");
@@ -165,18 +168,20 @@ void JCell::generateBinary(OasisBuilder& builder) const {
 
     // Generate placements
     for (const auto& placement : placements) {
-        placement->generateBinary(builder);
+        placement->generateBinary(creator);
     }
 }
 
 // JLayoutBuilder Implementation
-JLayoutBuilder::JLayoutBuilder(OasisBuilder& builder)
-    : builder(builder) {}
+JLayoutBuilder::JLayoutBuilder(OasisBuilder& creator)
+    : creator(creator) {}
 
 void JLayoutBuilder::beginFile(const std::string& version, const Oreal& unit, Validation::Scheme valScheme) {
     fileVersion = version;
     fileUnit = unit;
     fileValidationScheme = valScheme;
+
+    creator.beginFile(version, uint, valScheme);
 }
 
 void JLayoutBuilder::beginCell(CellName* cellName) {
@@ -186,6 +191,11 @@ void JLayoutBuilder::beginCell(CellName* cellName) {
 
 void JLayoutBuilder::endCell() {
     currentCell = nullptr;
+}
+
+void JLayoutBuilder::endFile()
+{
+    generateBinary();
 }
 
 void JLayoutBuilder::beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) {
@@ -260,10 +270,72 @@ JCell* JLayoutBuilder::findRootCell(CellName* cellName) const {
 void JLayoutBuilder::generateBinary() {
     for (const auto& cellPair : cells) {
         JCell* rootCell = findRootCell(cellPair.second->getName());
+        creator.beginCell(rootCell->getName());
+
         if (rootCell) {
-            rootCell->generateBinary(builder);
+            rootCell->generateBinary(creator);
         }
+
+        creator.endCell();
+        currentCell = nullptr;
     }
+
+    creator.endFile();
+}
+
+void JLayoutBuilder::beginXElement(SoftJin::Ulong attribute, const string &data)
+{
+    creator.beginXElement(attribute, data);
+}
+
+void JLayoutBuilder::beginXGeometry(SoftJin::Ulong layer, SoftJin::Ulong datatype, long x, long y, SoftJin::Ulong attribute, const string &data, const Repetition *rep)
+{
+    creator.beginXGeometry(layer, datatype, x, y, attribute, data, rep);
+}
+
+void JLayoutBuilder::addFileProperty(Property *prop)
+{
+    creator.addFileProperty(prop);
+}
+
+void JLayoutBuilder::addCellProperty(Property *prop)
+{
+    creator.addCellProperty(prop);
+}
+
+void JLayoutBuilder::addElementProperty(Property *prop)
+{
+    creator.addElementProperty(prop);
+}
+
+void JLayoutBuilder::registerCellName(CellName *cellName)
+{
+    creator.registerCellName(cellName);
+}
+
+void JLayoutBuilder::registerTextString(TextString *textString)
+{
+    creator.registerTextString(textString);
+}
+
+void JLayoutBuilder::registerPropName(PropName *propName)
+{
+    creator.registerPropName(propName);
+}
+
+void JLayoutBuilder::registerPropString(PropString *propString)
+{
+    creator.registerPropString(propString);
+}
+
+void JLayoutBuilder::registerLayerName(LayerName *layerName)
+{
+    creator.registerLayerName(layerName);
+}
+
+void JLayoutBuilder::registerXName(XName *xname)
+{
+    creator.registerXName(xname);
 }
 
 } // namespace Oasis
