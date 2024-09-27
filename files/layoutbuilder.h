@@ -34,7 +34,7 @@ public:
     enum Type { Rectangle, Square, Polygon, Path, Trapezoid, Circle, Text };
 
     virtual BBox getBBox() const = 0;
-    virtual void generateBinary(OasisBuilder& builder) const = 0;
+    virtual void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const = 0;
     virtual ~JShape() = default;
 
     Type getShapeType() const { return shapeType; }
@@ -51,7 +51,7 @@ public:
         : JShape(Rectangle), x(x), y(y), width(width), height(height), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y, width, height;
@@ -64,7 +64,7 @@ public:
         : JShape(Square), x(x), y(y), width(width), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y, width;
@@ -77,7 +77,7 @@ public:
         : JShape(Polygon), x(x), y(y), points(points), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y;
@@ -92,7 +92,7 @@ public:
         : JShape(Path), x(x), y(y), halfwidth(halfwidth), startExtn(startExtn), endExtn(endExtn), points(points), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y;
@@ -109,7 +109,7 @@ public:
         : JShape(Trapezoid), x(x), y(y), trapezoid(trapezoid), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y;
@@ -125,7 +125,7 @@ public:
         : JShape(Circle), x(x), y(y), radius(radius), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y, radius;
@@ -139,7 +139,7 @@ public:
         : JShape(Text), x(x), y(y), text(text), rep(rep) {}
 
     BBox getBBox() const override;
-    void generateBinary(OasisBuilder& builder) const override;
+    void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
 private:
     long x, y;
@@ -209,6 +209,7 @@ public:
     void beginFile(const string& version, const Oreal& unit, Validation::Scheme valScheme) override;
     void beginCell(CellName* cellName) override;
     void endCell() override;
+    void endFile() override;
 
     void beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) override;
     void beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) override;
@@ -223,15 +224,35 @@ public:
     void generateBinary();
 
 private:
-    OasisBuilder& builder;
+    OasisBuilder& creator;
     std::string fileVersion;
     Oreal fileUnit;
     Validation::Scheme fileValidationScheme;
 
     std::unordered_map<std::string, std::unique_ptr<JCell>> cells;
     JCell* currentCell = nullptr;
+
+    // OasisBuilder interface
+public:
+
+    void beginXElement(SoftJin::Ulong attribute, const string &data) override;
+    void beginXGeometry(SoftJin::Ulong layer, SoftJin::Ulong datatype, long x, long y, SoftJin::Ulong attribute, const string &data, const Repetition *rep) override;
+
+    void addFileProperty(Property *prop) override;
+    void addCellProperty(Property *prop) override;
+    void addElementProperty(Property *prop) override;
+
+    void registerCellName(CellName *cellName) override;
+    void registerTextString(TextString *textString) override;
+    void registerPropName(PropName *propName) override;
+    void registerPropString(PropString *propString) override;
+    void registerLayerName(LayerName *layerName) override;
+    void registerXName(XName *xname) override;
+
 };
 
 } // namespace Oasis
 
 #endif // OASIS_LAYOUTBUILDER_H
+
+
