@@ -1,6 +1,101 @@
 #include "layoutbuilder.h"
+#include <iostream>
+#include <iomanip>
+#include <map>
+
 
 namespace Oasis {
+using namespace JLayout;
+
+// Repetition 처리 함수
+void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vector<std::pair<long, long>>& positions) {
+    if (!rep) {
+        // Repetition이 없으면 단일 위치를 저장
+        positions.push_back({x, y});
+        return;
+    }
+
+    // 반복 타입에 따른 배치 좌표 처리
+    switch (rep->getType()) {
+    case Rep_Matrix: {
+        Ulong xdimen = rep->getMatrixXdimen();
+        Ulong ydimen = rep->getMatrixYdimen();
+        long xspace = rep->getMatrixXspace();
+        long yspace = rep->getMatrixYspace();
+
+        for (Ulong i = 0; i < xdimen; ++i) {
+            for (Ulong j = 0; j < ydimen; ++j) {
+                long newX = x + i * xspace;
+                long newY = y + j * yspace;
+                positions.push_back({newX, newY});
+            }
+        }
+        break;
+    }
+    case Rep_UniformX: {
+        Ulong dimen = rep->getDimen();
+        long xspace = rep->getUniformXspace();
+
+        for (Ulong i = 0; i < dimen; ++i) {
+            long newX = x + i * xspace;
+            positions.push_back({newX, y});
+        }
+        break;
+    }
+    case Rep_UniformY: {
+        Ulong dimen = rep->getDimen();
+        long yspace = rep->getUniformYspace();
+
+        for (Ulong i = 0; i < dimen; ++i) {
+            long newY = y + i * yspace;
+            positions.push_back({x, newY});
+        }
+        break;
+    }
+    case Rep_TiltedMatrix: {
+        Ulong ndimen = rep->getMatrixNdimen();
+        Ulong mdimen = rep->getMatrixMdimen();
+        Delta ndisp = rep->getMatrixNdelta();
+        Delta mdisp = rep->getMatrixMdelta();
+
+        for (Ulong i = 0; i < ndimen; ++i) {
+            for (Ulong j = 0; j < mdimen; ++j) {
+                long newX = x + i * ndisp.x + j * mdisp.x;
+                long newY = y + i * ndisp.y + j * mdisp.y;
+                positions.push_back({newX, newY});
+            }
+        }
+        break;
+    }
+    case Rep_Diagonal: {
+        Ulong dimen = rep->getDimen();
+        Delta delta = rep->getDiagonalDelta();
+
+        for (Ulong i = 0; i < dimen; ++i) {
+            long newX = x + i * delta.x;
+            long newY = y + i * delta.y;
+            positions.push_back({newX, newY});
+        }
+        break;
+    }
+    case Rep_Arbitrary:
+    case Rep_GridArbitrary: {
+        Ulong dimen = rep->getDimen();
+
+        for (Ulong i = 0; i < dimen; ++i) {
+            Delta delta = rep->getDelta(i);
+            long newX = x + delta.x;
+            long newY = y + delta.y;
+            positions.push_back({newX, newY});
+        }
+        break;
+    }
+    default:
+        // 기본 단일 배치
+        positions.push_back({x, y});
+        break;
+    }
+}
 
 // JRectangle Implementation
 
@@ -10,7 +105,9 @@ BBox JRectangle::getBBox() const {
 }
 
 void JRectangle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginRectangle(layer, datatype, x, y, width, height, rep); // Layer/datatype values assumed as placeholders
+    for (const auto& pos : repeatedPositions){
+        creator.beginRectangle(layer, datatype, pos.first, pos.second, width, height, nullptr);
+    }
 }
 
 // JSquare Implementation
@@ -21,7 +118,9 @@ BBox JSquare::getBBox() const {
 }
 
 void JSquare::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginRectangle(layer, datatype, x, y, width, width, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginRectangle(layer, datatype, pos.first, pos.second, width, width, nullptr);
+    }
 }
 
 // JPolygon Implementation
@@ -39,7 +138,9 @@ BBox JPolygon::getBBox() const {
 }
 
 void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginPolygon(layer, datatype, x, y, points, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginPolygon(layer, datatype, pos.first, pos.second, points, nullptr);
+    }
 }
 
 
@@ -57,7 +158,9 @@ BBox JPath::getBBox() const {
 }
 
 void JPath::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginPath(layer, datatype, x, y, halfwidth, startExtn, endExtn, points, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginPath(layer, datatype, pos.first, pos.second, halfwidth, startExtn, endExtn, points, nullptr);
+    }
 }
 
 // JTrapezoid Implementation
@@ -69,7 +172,9 @@ BBox JTrapezoid::getBBox() const {
 }
 
 void JTrapezoid::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginTrapezoid(layer, datatype, x, y, trapezoid, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginTrapezoid(layer, datatype, pos.first, pos.second, trapezoid, nullptr);
+    }
 }
 
 // JCircle Implementation
@@ -80,7 +185,9 @@ BBox JCircle::getBBox() const {
 }
 
 void JCircle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginCircle(layer, datatype, x, y, radius, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginCircle(layer, datatype, pos.first, pos.second, radius, nullptr);
+    }
 }
 
 // JText Implementation
@@ -93,17 +200,23 @@ BBox JText::getBBox() const {
 }
 
 void JText::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    creator.beginText(layer, datatype, x, y, text, rep); // Placeholder values
+    for (const auto& pos : repeatedPositions) {
+        creator.beginText(layer, datatype, pos.first, pos.second, text, nullptr);
+    }
 }
 
 
 // JPlacement Implementation
 
 JPlacement::JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep)
-    : cellName(cellName), x(x), y(y), mag(mag), angle(angle), flip(flip), rep(rep) {}
+    : cellName(cellName), x(x), y(y), mag(mag), angle(angle), flip(flip), rep(rep) {
+    JLayout::unpackRepetition(x, y, rep, repeatedPositions);
+}
 
 void JPlacement::generateBinary(OasisBuilder& creator) const {
-    creator.beginPlacement(cellName, x, y, mag, angle, flip, rep);
+    for (const auto& pos : repeatedPositions) {
+        creator.beginPlacement(cellName, pos.first, pos.second, mag, angle, flip, nullptr);
+    }
 }
 
 // JCell Implementation
@@ -132,43 +245,46 @@ CellName* JCell::getName() const {
 }
 
 void JCell::generateBinary(OasisBuilder& creator) const {
-    // Generate shapes
+
+    // Generate placements
+    for (const auto& placement : placements) {
+        placement->generateBinary(creator);
+    }
+
+    // Generate shapes and print BBox information
     for (const auto& pair : shapesByLayer) {
+        Ulong layer     = pair.first.layer;
+        Ulong datatype  = pair.first.datatype;
+
         for (const auto& shape : pair.second) {
-            Ulong layer     = pair.first.layer;
-            Ulong datatype  = pair.first.datatype;
+            std::string shapeType;
 
             switch (shape->getShapeType()) {
-            case JShape::Rectangle:
+            case JLayout::Rectangle:
                 static_cast<JRectangle*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Square:
+            case JLayout::Square:
                 static_cast<JSquare*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Polygon:
+            case JLayout::Polygon:
                 static_cast<JPolygon*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Path:
+            case JLayout::Path:
                 static_cast<JPath*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Trapezoid:
+            case JLayout::Trapezoid:
                 static_cast<JTrapezoid*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Circle:
+            case JLayout::Circle:
                 static_cast<JCircle*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
-            case JShape::Text:
+            case JLayout::Text:
                 static_cast<JText*>(shape.get())->generateBinary(creator, layer, datatype);
                 break;
             default:
                 throw std::runtime_error("Unknown shape type");
             }
         }
-    }
-
-    // Generate placements
-    for (const auto& placement : placements) {
-        placement->generateBinary(creator);
     }
 }
 
@@ -181,7 +297,7 @@ void JLayoutBuilder::beginFile(const std::string& version, const Oreal& unit, Va
     fileUnit = unit;
     fileValidationScheme = valScheme;
 
-    creator.beginFile(version, uint, valScheme);
+    creator.beginFile(version, unit, valScheme);
 }
 
 void JLayoutBuilder::beginCell(CellName* cellName) {
@@ -201,6 +317,9 @@ void JLayoutBuilder::endFile()
 void JLayoutBuilder::beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) {
     if (currentCell) {
         Layer layerKey{layer, datatype};
+        if (width == height){
+            currentCell->addShape(layerKey, std::unique_ptr<JShape>(new JSquare(x, y, width, rep)));
+        }
         currentCell->addShape(layerKey, std::unique_ptr<JShape>(new JRectangle(x, y, width, height, rep)));
     }
 }
@@ -213,10 +332,13 @@ void JLayoutBuilder::beginPolygon(Ulong layer, Ulong datatype, long x, long y, c
 }
 
 void JLayoutBuilder::beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) {
-    if (currentCell) {
-        currentCell->addPlacement(std::unique_ptr<JPlacement>(new JPlacement(cellName, x, y, mag, angle, flip, rep)));
-        updateCellHierarchy(currentCell->getName(), cellName);
+    if (!currentCell) {
+        return;
     }
+
+    std::unique_ptr<JPlacement> placement(new JPlacement(cellName, x, y, mag, angle, flip, rep));
+    currentCell->addPlacement(std::move(placement));
+    updateCellHierarchy(currentCell->getName(), cellName);
 }
 
 void JLayoutBuilder::beginText(Ulong textlayer, Ulong texttype, long x, long y, TextString* text, const Repetition* rep) {
@@ -233,7 +355,7 @@ void JLayoutBuilder::beginPath(Ulong layer, Ulong datatype, long x, long y, long
     }
 }
 
-void JLayoutBuilder::beginTrapezoid(Ulong layer, Ulong datatype, long x, long y, const Trapezoid& trap, const Repetition* rep) {
+void JLayoutBuilder::beginTrapezoid(Ulong layer, Ulong datatype, long x, long y, const Oasis::Trapezoid& trap, const Repetition* rep) {
     if (currentCell) {
         Layer layerKey{layer, datatype};
         currentCell->addShape(layerKey, std::make_unique<JTrapezoid>(x, y, trap, rep));
@@ -268,8 +390,11 @@ JCell* JLayoutBuilder::findRootCell(CellName* cellName) const {
 }
 
 void JLayoutBuilder::generateBinary() {
-    for (const auto& cellPair : cells) {
+
+    for (const auto& cellPair : cells)
+    {
         JCell* rootCell = findRootCell(cellPair.second->getName());
+
         creator.beginCell(rootCell->getName());
 
         if (rootCell) {
@@ -281,7 +406,87 @@ void JLayoutBuilder::generateBinary() {
     }
 
     creator.endFile();
+
+    printLayoutInfo();
 }
+
+
+// JLayoutBuilder::printLayoutInfo 함수 구현
+void JLayoutBuilder::printLayoutInfo() const {
+    std::cout << std::setw(30) << "[Layout Info]" << std::endl;
+    std::cout << "File Version: " << fileVersion << ", Unit: " << fileUnit.getValue() << std::endl;
+    std::cout << "______________________________________________________________________" << std::endl;
+    std::cout << std::left  // 왼쪽 정렬
+              << std::setw(12) << "Layer"
+              << std::setw(16) << "Cell"
+              << std::setw(12) << "Type"
+              << std::setw(24) << "BBox" << std::endl;
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+
+    // std::multimap을 사용하여 layer 기준으로 오름차순 정렬
+    std::multimap<std::string, std::tuple<std::string, std::string, JLayout::BBox>> sortedShapes;
+
+    for (const auto& cellPair : cells) {
+        const JCell* cell = cellPair.second.get();
+        std::string cellName = cell->getName()->getName();  // 셀 이름 가져오기
+
+        for (const auto& layerShapes : cell->getShapesByLayer()) {
+            const JLayout::Layer& layerKey = layerShapes.first;
+            std::string layerKeyStr = std::to_string(layerKey.layer) + "." + std::to_string(layerKey.datatype);  // layer + datatype
+
+            for (const auto& shape : layerShapes.second) {
+                JLayout::BBox bbox = shape->getBBox();
+                std::string shapeType;
+
+                switch (shape->getShapeType()) {
+                case JLayout::Rectangle: shapeType = "Rectangle"; break;
+                case JLayout::Square: shapeType = "Square"; break;
+                case JLayout::Polygon: shapeType = "Polygon"; break;
+                case JLayout::Path: shapeType = "Path"; break;
+                case JLayout::Trapezoid: shapeType = "Trapezoid"; break;
+                case JLayout::Circle: shapeType = "Circle"; break;
+                case JLayout::Text: shapeType = "Text"; break;
+                default: shapeType = "Unknown"; break;
+                }
+
+                // Layer 정보와 함께 저장
+                sortedShapes.emplace(layerKeyStr, std::make_tuple(cellName, shapeType, bbox));
+            }
+        }
+    }
+
+    std::string prevLayer;
+    std::string prevCell;
+
+    // 정렬된 Layer 순서대로 출력
+    for (const auto& shapeInfo : sortedShapes) {
+        const std::string& layerStr = shapeInfo.first;
+        const std::string& cellName = std::get<0>(shapeInfo.second);  // 셀 이름
+        const std::string& shapeType = std::get<1>(shapeInfo.second);  // 도형 타입
+        const JLayout::BBox& bbox = std::get<2>(shapeInfo.second);  // BBox 정보
+
+        // 같은 Layer와 Cell 이름일 때 빈칸 출력
+        std::string layerOutput = (layerStr == prevLayer) ? "" : layerStr;
+        std::string cellOutput = (cellName == prevCell) ? "" : cellName;
+
+        std::cout << std::left  // 왼쪽 정렬
+                  << std::setw(12) << layerOutput  // layer 출력 (layer + datatype)
+                  << std::setw(16) << cellOutput  // cell 이름 출력
+                  << std::setw(12) << shapeType  // 도형 타입 출력
+                  << "(" << bbox.x_min << ", " << bbox.y_min << ", "
+                  << bbox.x_max << ", " << bbox.y_max << ")" << std::endl;
+
+        // 이전 Layer와 Cell 저장
+        prevLayer = layerStr;
+        prevCell = cellName;
+    }
+
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+}
+
+
+
+
 
 void JLayoutBuilder::beginXElement(SoftJin::Ulong attribute, const string &data)
 {
