@@ -127,14 +127,14 @@ void JSquare::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype)
 
 BBox JPolygon::getBBox() const {
     // Calculate BBox from the points list
-    long x_min = x, y_min = y, x_max = x, y_max = y;
+    long x_min = LONG_MAX, y_min = LONG_MAX, x_max = LONG_MIN, y_max = LONG_MIN;
     for (const auto& point : points) {
         if (point.x < x_min) x_min = point.x;
         if (point.x > x_max) x_max = point.x;
         if (point.y < y_min) y_min = point.y;
         if (point.y > y_max) y_max = point.y;
     }
-    return {x_min, y_min, x_max, y_max};
+    return {x_min + x, y_min + y, x_max + x, y_max + y};
 }
 
 void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
