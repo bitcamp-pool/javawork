@@ -10,3 +10,17 @@
 이름:최지혜
 주소: 서울시 강남구
 ---------------------
+- Cell의 bbox 구하기 : 트리 트레버스(중복계산 x) 
+  haslayer
+  get bbox(layer)
+  delete layer
+  copy layer
+  Modify Layer
+  writeOasisFile
+  export
+- 객체 분리
+  Cellbuilder : 
+
+- LayoutBuilder : (beginCell~ endCell) Cellbuilder
+- Layout : 파일 정보, cells, topcell*;
+
