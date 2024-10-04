@@ -100,7 +100,14 @@ void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vecto
 // JRectangle Implementation
 
 BBox JRectangle::getBBox() const {
-    BBox bbox = {x, y, x + width, y + height};
+    long x_min = LONG_MAX, y_min = LONG_MAX, x_max = LONG_MIN, y_max = LONG_MIN;
+    JLayout::BBox bbox = {x_min, y_min, x_max, y_max};
+
+    bbox.x_min = std::min(bbox.x_min, x);
+    bbox.y_min = std::min(bbox.y_min, y);
+    bbox.x_max = std::max(bbox.x_max, x + width);
+    bbox.y_max = std::max(bbox.y_max, y + height);
+    
     return bbox;
 }
 
