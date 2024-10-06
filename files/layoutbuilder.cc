@@ -1,7 +1,6 @@
 #include "layoutbuilder.h"
 #include <iostream>
 #include <iomanip>
-#include <map>
 
 
 namespace Oasis {
@@ -20,8 +19,8 @@ void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vecto
     case Rep_Matrix: {
         Ulong xdimen = rep->getMatrixXdimen();
         Ulong ydimen = rep->getMatrixYdimen();
-        long xspace = rep->getMatrixXspace();
-        long yspace = rep->getMatrixYspace();
+        long  xspace = rep->getMatrixXspace();
+        long  yspace = rep->getMatrixYspace();
 
         for (Ulong i = 0; i < xdimen; ++i) {
             for (Ulong j = 0; j < ydimen; ++j) {
@@ -55,8 +54,8 @@ void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vecto
     case Rep_TiltedMatrix: {
         Ulong ndimen = rep->getMatrixNdimen();
         Ulong mdimen = rep->getMatrixMdimen();
-        Delta ndisp = rep->getMatrixNdelta();
-        Delta mdisp = rep->getMatrixMdelta();
+        Delta  ndisp = rep->getMatrixNdelta();
+        Delta  mdisp = rep->getMatrixMdelta();
 
         for (Ulong i = 0; i < ndimen; ++i) {
             for (Ulong j = 0; j < mdimen; ++j) {
@@ -90,6 +89,27 @@ void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vecto
         }
         break;
     }
+    // Varying 및 GridVarying 처리
+    case Rep_VaryingX :
+    case Rep_GridVaryingX : {
+        Ulong dimen = rep->getDimen();
+
+        for (Ulong i = 0; i < dimen; ++i){
+            long newX = x + rep->getVaryingXoffset(i);
+            positions.push_back({newX, y});
+        }
+        break;
+    }
+    case Rep_VaryingY :
+    case Rep_GridVaryingY : {
+        Ulong dimen = rep->getDimen();
+
+        for (Ulong i = 0; i < dimen; ++i){
+            long newY = y + rep->getVaryingYoffset(i);
+            positions.push_back({x, newY});
+        }
+        break;
+    }
     default:
         // 기본 단일 배치
         positions.push_back({x, y});
@@ -100,16 +120,17 @@ void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vecto
 // JRectangle Implementation
 
 BBox JRectangle::getBBox() const {
-    long x_min = LONG_MAX, y_min = LONG_MAX, x_max = LONG_MIN, y_max = LONG_MIN;
-    JLayout::BBox bbox = {x_min, y_min, x_max, y_max};
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
 
-    bbox.x_min = std::min(bbox.x_min, x);
-    bbox.y_min = std::min(bbox.y_min, y);
-    bbox.x_max = std::max(bbox.x_max, x + width);
-    bbox.y_max = std::max(bbox.y_max, y + height);
-    
-    return bbox;
+    x_min = std::min(x_min, x);
+    y_min = std::min(y_min, y);
+    x_max = std::max(x_max, x + width);
+    y_max = std::max(y_max, y + height);
+
+    return {x_min, y_min, x_max, y_max};
 }
+
 
 void JRectangle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions){
@@ -117,12 +138,26 @@ void JRectangle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong dataty
     }
 }
 
+std::vector<std::pair<long, long> > JRectangle::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
 // JSquare Implementation
 
 BBox JSquare::getBBox() const {
-    BBox bbox = {x, y, x + width, y + width}; // Square, so width = height
-    return bbox;
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
+    // 정사각형이므로 width = height
+    x_min = std::min(x_min, x);
+    y_min = std::min(y_min, y);
+    x_max = std::max(x_max, x + width);
+    y_max = std::max(y_max, y + width);
+
+    return {x_min, y_min, x_max, y_max};
 }
+
 
 void JSquare::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
@@ -130,11 +165,45 @@ void JSquare::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype)
     }
 }
 
+std::vector<std::pair<long, long> > JSquare::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
 // JPolygon Implementation
 
 BBox JPolygon::getBBox() const {
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
     // Calculate BBox from the points list
-    long x_min = LONG_MAX, y_min = LONG_MAX, x_max = LONG_MIN, y_max = LONG_MIN;
+    for (const auto& point : points) {
+        if (point.x < x_min) x_min = point.x;
+        if (point.x > x_max) x_max = point.x;
+        if (point.y < y_min) y_min = point.y;
+        if (point.y > y_max) y_max = point.y;
+    }
+    return {x_min + x , y_min + y, x_max + x, y_max + y};
+}
+
+void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
+    for (const auto& pos : repeatedPositions) {
+        creator.beginPolygon(layer, datatype, pos.first, pos.second, points, nullptr);
+    }
+}
+
+std::vector<std::pair<long, long> > JPolygon::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
+
+// JPath Implementation
+
+BBox JPath::getBBox() const {
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
     for (const auto& point : points) {
         if (point.x < x_min) x_min = point.x;
         if (point.x > x_max) x_max = point.x;
@@ -144,39 +213,31 @@ BBox JPolygon::getBBox() const {
     return {x_min + x, y_min + y, x_max + x, y_max + y};
 }
 
-void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
-    for (const auto& pos : repeatedPositions) {
-        creator.beginPolygon(layer, datatype, pos.first, pos.second, points, nullptr);
-    }
-}
-
-
-// JPath Implementation
-
-BBox JPath::getBBox() const {
-    long x_min = x, y_min = y, x_max = x, y_max = y;
-    for (const auto& point : points) {
-        if (point.x < x_min) x_min = point.x;
-        if (point.x > x_max) x_max = point.x;
-        if (point.y < y_min) y_min = point.y;
-        if (point.y > y_max) y_max = point.y;
-    }
-    return {x_min, y_min, x_max, y_max};
-}
-
 void JPath::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
         creator.beginPath(layer, datatype, pos.first, pos.second, halfwidth, startExtn, endExtn, points, nullptr);
     }
 }
 
+std::vector<std::pair<long, long> > JPath::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
 // JTrapezoid Implementation
 
 BBox JTrapezoid::getBBox() const {
-    // Calculate BBox based on trapezoid's geometric properties
-    long x_min = x, y_min = y, x_max = x + trapezoid.getWidth(), y_max = y + trapezoid.getHeight();
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
+    x_min = std::min(x_min, x);
+    y_min = std::min(y_min, y);
+    x_max = std::max(x_max, x + trapezoid.getWidth());
+    y_max = std::max(y_max, y + trapezoid.getHeight());
+
     return {x_min, y_min, x_max, y_max};
 }
+
 
 void JTrapezoid::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
@@ -184,12 +245,22 @@ void JTrapezoid::generateBinary(OasisBuilder& creator, Ulong layer, Ulong dataty
     }
 }
 
+std::vector<std::pair<long, long> > JTrapezoid::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
 // JCircle Implementation
 
 BBox JCircle::getBBox() const {
-    BBox bbox = {x - radius, y - radius, x + radius, y + radius};
-    return bbox;
+    long x_min = x - radius;
+    long y_min = y - radius;
+    long x_max = x + radius;
+    long y_max = y + radius;
+
+    return {x_min, y_min, x_max, y_max};
 }
+
 
 void JCircle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
@@ -197,19 +268,36 @@ void JCircle::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype)
     }
 }
 
+std::vector<std::pair<long, long> > JCircle::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
 // JText Implementation
 
 BBox JText::getBBox() const {
-    // Simplified text BBox (actual calculation depends on font and text size)
-    long textWidth = text->getName().length() * 10;  // Placeholder for text width
-    BBox bbox = {x, y, x + textWidth, y + 20};  // Placeholder height
-    return bbox;
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
+    long textWidth = text->getName().length() * 10;  // 텍스트 폭 계산 (임시)
+    x_min = std::min(x_min, x);
+    y_min = std::min(y_min, y);
+    x_max = std::max(x_max, x + textWidth);
+    y_max = std::max(y_max, y + 20);  // 텍스트 높이 임시 값
+
+    return {x_min, y_min, x_max, y_max};
 }
+
 
 void JText::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
         creator.beginText(layer, datatype, pos.first, pos.second, text, nullptr);
     }
+}
+
+std::vector<std::pair<long, long> > JText::getRepeatedPositions() const
+{
+    return repeatedPositions;
 }
 
 
@@ -225,6 +313,27 @@ void JPlacement::generateBinary(OasisBuilder& creator) const {
         creator.beginPlacement(cellName, pos.first, pos.second, mag, angle, flip, nullptr);
     }
 }
+
+std::vector<std::pair<long, long> > JPlacement::getRepeatedPositions() const
+{
+    return repeatedPositions;
+}
+
+CellName *JPlacement::getName() const
+{
+    return cellName;
+}
+
+long JPlacement::getX() const
+{
+    return x;
+}
+
+long JPlacement::getY() const
+{
+    return y;
+}
+
 
 // JCell Implementation
 
@@ -264,7 +373,6 @@ void JCell::generateBinary(OasisBuilder& creator) const {
         Ulong datatype  = pair.first.datatype;
 
         for (const auto& shape : pair.second) {
-            std::string shapeType;
 
             switch (shape->getShapeType()) {
             case JLayout::Rectangle:
@@ -293,6 +401,11 @@ void JCell::generateBinary(OasisBuilder& creator) const {
             }
         }
     }
+}
+
+
+const std::vector<std::unique_ptr<JPlacement>>& JCell::getPlacements() const {
+    return placements;
 }
 
 // JLayoutBuilder Implementation
@@ -389,12 +502,77 @@ void JLayoutBuilder::updateCellHierarchy(CellName* parent, CellName* child) {
 }
 
 JCell* JLayoutBuilder::findRootCell(CellName* cellName) const {
-    auto cellIter = cells.find(cellName->getName());
-    if (cellIter != cells.end()) {
-        return cellIter->second.get();
+    auto it = cells.find(cellName->getName());
+    if (it != cells.end()) {
+        return it->second.get();
     }
     return nullptr;
 }
+
+
+// 함수 정의 수정
+JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const {
+    // Cell의 BBox 캐시를 확인 (이미 계산된 경우)
+    if (cell->getCachedBBox()) {
+        return *(cell->getCachedBBox());
+    }
+
+    // 순환 참조 방지
+    if (visited.find(cell) != visited.end()) {
+        throw std::runtime_error("Circular reference detected in cell hierarchy");
+    }
+    visited.insert(cell);
+
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
+    // 각 shape에 대해 BBox를 계산
+    for (const auto& layerShapes : cell->getShapesByLayer()) {
+        for (const auto& shape : layerShapes.second) {
+            JLayout::BBox shapeBBox = shape->getBBox();
+            x_min = std::min(x_min, shapeBBox.x_min);
+            y_min = std::min(y_min, shapeBBox.y_min);
+            x_max = std::max(x_max, shapeBBox.x_max);
+            y_max = std::max(y_max, shapeBBox.y_max);
+        }
+    }
+
+    // 각 placement에 대해 BBox 계산
+    for (const auto& placement : cell->getPlacements()) {
+        long placement_x_min = LONG_MAX, placement_y_min = LONG_MAX;
+        long placement_x_max = LONG_MIN, placement_y_max = LONG_MIN;
+
+        // repeatedPositions에서 각 위치의 min/max 값 계산
+        for (const auto& pos : placement->getRepeatedPositions()) {
+            placement_x_min = std::min(placement_x_min, pos.first);
+            placement_y_min = std::min(placement_y_min, pos.second);
+            placement_x_max = std::max(placement_x_max, pos.first);
+            placement_y_max = std::max(placement_y_max, pos.second);
+        }
+
+        // 참조된 셀의 BBox를 가져와서 placement의 좌표와 더함
+        const JCell* referencedCell = findRootCell(placement->getName());
+        if (referencedCell) {
+            JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);
+            x_min = std::min(x_min, placement_x_min + referencedCellBBox.x_min);
+            y_min = std::min(y_min, placement_y_min + referencedCellBBox.y_min);
+            x_max = std::max(x_max, placement_x_max + referencedCellBBox.x_max);
+            y_max = std::max(y_max, placement_y_max + referencedCellBBox.y_max);
+        }
+    }
+
+    // 계산된 BBox를 Cell에 캐싱
+    const_cast<JCell*>(cell)->setCachedBBox(std::unique_ptr<JLayout::BBox>(new JLayout::BBox{x_min, y_min, x_max, y_max}));
+
+    // visited에서 제거
+    visited.erase(cell);
+
+    return {x_min, y_min, x_max, y_max};
+}
+
+
+
+
 
 void JLayoutBuilder::generateBinary() {
 
@@ -420,78 +598,40 @@ void JLayoutBuilder::generateBinary() {
 
 // JLayoutBuilder::printLayoutInfo 함수 구현
 void JLayoutBuilder::printLayoutInfo() const {
-    std::cout << std::setw(30) << "[Layout Info]" << std::endl;
-    std::cout << "File Version: " << fileVersion << ", Unit: " << fileUnit.getValue() << std::endl;
-    std::cout << "______________________________________________________________________" << std::endl;
-    std::cout << std::left  // 왼쪽 정렬
-              << std::setw(12) << "Layer"
-              << std::setw(16) << "Cell"
-              << std::setw(12) << "Type"
-              << std::setw(24) << "BBox" << std::endl;
+    std::cout << std::left
+              << std::setw(10) << "Layer"    // Layer는 10칸으로, 왼쪽 정렬
+              << std::setw(50) << "Cell"     // Cell 이름은 50칸으로, 왼쪽 정렬
+              << std::setw(30) << "BBox"     // BBox는 30칸으로, 왼쪽 정렬
+              << std::endl;
+
     std::cout << "----------------------------------------------------------------------" << std::endl;
 
-    // std::multimap을 사용하여 layer 기준으로 오름차순 정렬
-    std::multimap<std::string, std::tuple<std::string, std::string, JLayout::BBox>> sortedShapes;
+    std::unordered_set<const JCell*> visited;
 
+    // 셀 정보 출력
     for (const auto& cellPair : cells) {
-        const JCell* cell = cellPair.second.get();
+        JCell* cell = cellPair.second.get();
         std::string cellName = cell->getName()->getName();  // 셀 이름 가져오기
 
-        for (const auto& layerShapes : cell->getShapesByLayer()) {
-            const JLayout::Layer& layerKey = layerShapes.first;
-            std::string layerKeyStr = std::to_string(layerKey.layer) + "." + std::to_string(layerKey.datatype);  // layer + datatype
+        JLayout::BBox cellBBox = calculateCellBBox(cell, visited);  // Cell의 BBox 계산
 
-            for (const auto& shape : layerShapes.second) {
-                JLayout::BBox bbox = shape->getBBox();
-                std::string shapeType;
-
-                switch (shape->getShapeType()) {
-                case JLayout::Rectangle: shapeType = "Rectangle"; break;
-                case JLayout::Square: shapeType = "Square"; break;
-                case JLayout::Polygon: shapeType = "Polygon"; break;
-                case JLayout::Path: shapeType = "Path"; break;
-                case JLayout::Trapezoid: shapeType = "Trapezoid"; break;
-                case JLayout::Circle: shapeType = "Circle"; break;
-                case JLayout::Text: shapeType = "Text"; break;
-                default: shapeType = "Unknown"; break;
-                }
-
-                // Layer 정보와 함께 저장
-                sortedShapes.emplace(layerKeyStr, std::make_tuple(cellName, shapeType, bbox));
-            }
+        // 셀 이름이 너무 길 경우 자르기
+        std::string cellOutput = cellName;
+        if (cellOutput.length() > 50) {
+            cellOutput = cellOutput.substr(0, 47) + "...";
         }
-    }
 
-    std::string prevLayer;
-    std::string prevCell;
-
-    // 정렬된 Layer 순서대로 출력
-    for (const auto& shapeInfo : sortedShapes) {
-        const std::string& layerStr = shapeInfo.first;
-        const std::string& cellName = std::get<0>(shapeInfo.second);  // 셀 이름
-        const std::string& shapeType = std::get<1>(shapeInfo.second);  // 도형 타입
-        const JLayout::BBox& bbox = std::get<2>(shapeInfo.second);  // BBox 정보
-
-        // 같은 Layer와 Cell 이름일 때 빈칸 출력
-        std::string layerOutput = (layerStr == prevLayer) ? "" : layerStr;
-        std::string cellOutput = (cellName == prevCell) ? "" : cellName;
-
-        std::cout << std::left  // 왼쪽 정렬
-                  << std::setw(12) << layerOutput  // layer 출력 (layer + datatype)
-                  << std::setw(16) << cellOutput  // cell 이름 출력
-                  << std::setw(12) << shapeType  // 도형 타입 출력
-                  << "(" << bbox.x_min << ", " << bbox.y_min << ", "
-                  << bbox.x_max << ", " << bbox.y_max << ")" << std::endl;
-
-        // 이전 Layer와 Cell 저장
-        prevLayer = layerStr;
-        prevCell = cellName;
+        // 정보 출력 (왼쪽 정렬)
+        std::cout << std::left
+                  << std::setw(10) << " "  // Layer는 비워둠
+                  << std::setw(50) << cellOutput   // Cell 이름 출력
+                  << std::setw(30) << "(" + std::to_string(cellBBox.x_min) + ", " + std::to_string(cellBBox.y_min) + ", "
+                                          + std::to_string(cellBBox.x_max) + ", " + std::to_string(cellBBox.y_max) + ")"  // BBox 출력
+                  << std::endl;
     }
 
     std::cout << "----------------------------------------------------------------------" << std::endl;
 }
-
-
 
 
 
