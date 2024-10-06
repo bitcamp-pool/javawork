@@ -90,6 +90,8 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+
 private:
     long x, y, width, height;
     const Repetition* rep;
@@ -106,6 +108,8 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+
 private:
     long x, y, width;
     const Repetition* rep;
@@ -121,6 +125,8 @@ public:
 
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
+
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
 
 private:
     long x, y;
@@ -139,6 +145,8 @@ public:
 
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
+
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
 
 private:
     long x, y;
@@ -160,6 +168,8 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+
 private:
     long x, y;
     class Trapezoid trapezoid;  // Trapezoid는 구조체로 정의된 도형의 속성 (예: 두 변의 길이, 높이)
@@ -179,6 +189,8 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+
 private:
     long x, y, radius;
     const Repetition* rep;
@@ -196,6 +208,8 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+
 private:
     long x, y;
     TextString* text;
@@ -208,6 +222,13 @@ class JPlacement {
 public:
     JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep);
     void generateBinary(OasisBuilder& builder) const;
+
+    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    CellName* getName() const;
+
+    long getX() const;
+
+    long getY() const;
 
 private:
     CellName* cellName;
@@ -239,12 +260,28 @@ public:
     const std::unordered_map<JLayout::Layer, std::vector<std::unique_ptr<JShape>>, JLayout::Layer::HashFunction>& getShapesByLayer() const {
         return shapesByLayer;
     }
+    // placements 벡터에 대한 const 참조 반환
+    const std::vector<std::unique_ptr<JPlacement>>& getPlacements() const;
+
+
+    // BBox 캐시를 설정하는 함수
+    void setCachedBBox(std::unique_ptr<JLayout::BBox> bbox) {
+        cachedBBox = std::move(bbox);
+    }
+
+    // BBox 캐시를 반환하는 함수
+    const JLayout::BBox* getCachedBBox() const {
+        return cachedBBox.get();  // unique_ptr에서 포인터를 반환
+    }
 
 private:
     CellName* name;
     std::unordered_map<JLayout::Layer, std::vector<std::unique_ptr<JShape>>, JLayout::Layer::HashFunction> shapesByLayer;
     std::vector<std::unique_ptr<JPlacement>> placements;
     std::unordered_set<JCell*> children;
+
+    // BBox 캐시 변수
+    std::unique_ptr<JLayout::BBox> cachedBBox = nullptr;
 };
 
 
@@ -268,6 +305,9 @@ public:
 
     void updateCellHierarchy(CellName* parent, CellName* child);
     JCell* findRootCell(CellName* cellName) const;
+
+    // Cell BBox 계산 함수
+    JLayout::BBox calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const;
 
     // 레이아웃 정보를 파일로 생성하는 함수
     void generateBinary();
