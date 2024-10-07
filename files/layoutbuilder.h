@@ -58,6 +58,9 @@ public:
 // Repetition 처리 함수
 void unpackRepetition(long x, long y, const Repetition* rep, std::vector<std::pair<long, long>>& positions);
 
+// Point 변환 함수 선언
+std::pair<long, long> transformPoint(long x, long y, const Oreal& mag, const Oreal& angle, bool flip);
+
 }  // namespace JLayout
 
 
