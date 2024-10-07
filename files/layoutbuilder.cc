@@ -6,6 +6,28 @@
 namespace Oasis {
 using namespace JLayout;
 
+
+
+// Point 변환 함수 정의 (변환 로직 구현)
+std::pair<long, long> transformPoint(long x, long y, double mag, double angle, bool flip) {
+    // 스케일 적용
+    long newX = static_cast<long>(x * mag);
+    long newY = static_cast<long>(y * mag);
+
+    // 회전 각도 적용 (라디안으로 변환)
+    double rad = angle * M_PI / 180.0;
+    long rotatedX = static_cast<long>(newX * cos(rad) - newY * sin(rad));
+    long rotatedY = static_cast<long>(newX * sin(rad) + newY * cos(rad));
+
+    // 플립 적용 (x축 또는 y축 기준 반전)
+    if (flip) {
+        rotatedX = -rotatedX;
+    }
+
+    return {rotatedX, rotatedY};
+}
+
+
 // Repetition 처리 함수
 void JLayout::unpackRepetition(long x, long y, const Repetition* rep, std::vector<std::pair<long, long>>& positions) {
     if (!rep) {
@@ -608,10 +630,30 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
         if (referencedCell) {
             JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);
 
-            x_min = std::min(x_min, placement_x_min + referencedCellBBox.x_min);
-            y_min = std::min(y_min, placement_y_min + referencedCellBBox.y_min);
-            x_max = std::max(x_max, placement_x_max + referencedCellBBox.x_max);
-            y_max = std::max(y_max, placement_y_max + referencedCellBBox.y_max);
+            // x_min = std::min(x_min, placement_x_min + referencedCellBBox.x_min);
+            // y_min = std::min(y_min, placement_y_min + referencedCellBBox.y_min);
+            // x_max = std::max(x_max, placement_x_max + referencedCellBBox.x_max);
+            // y_max = std::max(y_max, placement_y_max + referencedCellBBox.y_max);
+
+            // 네 개의 모서리 좌표 변환
+            auto transformedBottomLeft = transformPoint(referencedCellBBox.x_min, referencedCellBBox.y_min, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
+            auto transformedBottomRight = transformPoint(referencedCellBBox.x_max, referencedCellBBox.y_min, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
+            auto transformedTopLeft = transformPoint(referencedCellBBox.x_min, referencedCellBBox.y_max, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
+            auto transformedTopRight = transformPoint(referencedCellBBox.x_max, referencedCellBBox.y_max, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
+
+
+            // 변환된 좌표를 사용해 새로운 BBox 계산
+            long transformed_x_min = std::min({transformedBottomLeft.first, transformedBottomRight.first, transformedTopLeft.first, transformedTopRight.first});
+            long transformed_y_min = std::min({transformedBottomLeft.second, transformedBottomRight.second, transformedTopLeft.second, transformedTopRight.second});
+            long transformed_x_max = std::max({transformedBottomLeft.first, transformedBottomRight.first, transformedTopLeft.first, transformedTopRight.first});
+            long transformed_y_max = std::max({transformedBottomLeft.second, transformedBottomRight.second, transformedTopLeft.second, transformedTopRight.second});
+
+            // 최종 BBox에 반영
+            x_min = std::min(x_min, placement_x_min + transformed_x_min);
+            y_min = std::min(y_min, placement_y_min + transformed_y_min);
+            x_max = std::max(x_max, placement_x_max + transformed_x_max);
+            y_max = std::max(y_max, placement_y_max + transformed_y_max);
+
         }
     }
 
