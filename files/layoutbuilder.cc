@@ -319,6 +319,44 @@ std::vector<std::pair<long, long> > JPlacement::getRepeatedPositions() const
     return repeatedPositions;
 }
 
+
+/**
+ * mag, angle, flip 변환을 적용하여 좌표를 변환하는 함수 구현
+ * 변환이 적용된 좌표 목록을 반환하는 함수입니다.
+ */
+std::vector<std::pair<long, long>> JPlacement::getTransformedPositions() const {
+    std::vector<std::pair<long, long>> transformedPositions;
+    transformedPositions.reserve(repeatedPositions.size());
+
+    for (const auto& pos : repeatedPositions) {
+        long transformedX = pos.first;
+        long transformedY = pos.second;
+
+        // 확대/축소 적용
+        transformedX = static_cast<long>(transformedX * mag.getValue());
+        transformedY = static_cast<long>(transformedY * mag.getValue());
+
+        // 회전 적용
+        if (angle != 0) {
+            double radians = angle.getValue() * M_PI / 180.0;  // 각도를 라디안으로 변환
+            long rotatedX = static_cast<long>(transformedX * cos(radians) - transformedY * sin(radians));
+            long rotatedY = static_cast<long>(transformedX * sin(radians) + transformedY * cos(radians));
+            transformedX = rotatedX;
+            transformedY = rotatedY;
+        }
+
+        // 뒤집기 적용
+        if (flip) {
+            transformedY = -transformedY;  // 필요에 따라 y축을 기준으로 뒤집기 (x축도 가능)
+        }
+
+        transformedPositions.emplace_back(transformedX, transformedY);
+    }
+
+    return transformedPositions;
+}
+
+
 CellName *JPlacement::getName() const
 {
     return cellName;
@@ -332,6 +370,21 @@ long JPlacement::getX() const
 long JPlacement::getY() const
 {
     return y;
+}
+
+Oreal JPlacement::getMag() const
+{
+    return mag;
+}
+
+Oreal JPlacement::getAngle() const
+{
+    return angle;
+}
+
+bool JPlacement::getFlip() const
+{
+    return flip;
 }
 
 
@@ -501,7 +554,7 @@ void JLayoutBuilder::updateCellHierarchy(CellName* parent, CellName* child) {
     }
 }
 
-JCell* JLayoutBuilder::findRootCell(CellName* cellName) const {
+JCell* JLayoutBuilder::findRefCell(CellName* cellName) const {
     auto it = cells.find(cellName->getName());
     if (it != cells.end()) {
         return it->second.get();
@@ -551,9 +604,10 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
         }
 
         // 참조된 셀의 BBox를 가져와서 placement의 좌표와 더함
-        const JCell* referencedCell = findRootCell(placement->getName());
+        const JCell* referencedCell = findRefCell(placement->getName());
         if (referencedCell) {
             JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);
+
             x_min = std::min(x_min, placement_x_min + referencedCellBBox.x_min);
             y_min = std::min(y_min, placement_y_min + referencedCellBBox.y_min);
             x_max = std::max(x_max, placement_x_max + referencedCellBBox.x_max);
@@ -578,7 +632,7 @@ void JLayoutBuilder::generateBinary() {
 
     for (const auto& cellPair : cells)
     {
-        JCell* rootCell = findRootCell(cellPair.second->getName());
+        JCell* rootCell = findRefCell(cellPair.second->getName());
 
         creator.beginCell(rootCell->getName());
 
