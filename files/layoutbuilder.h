@@ -15,7 +15,7 @@
 #include "rectypes.h"
 #include "writer.h"
 
-
+#include <math.h> // 각도 변환을 위해 필요
 
 namespace Oasis {
 
@@ -223,12 +223,18 @@ public:
     JPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep);
     void generateBinary(OasisBuilder& builder) const;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long>> getRepeatedPositions() const;
+    std::vector<std::pair<long, long>> getTransformedPositions() const;  // 변환된 좌표를 반환하는 함수 추가
     CellName* getName() const;
 
     long getX() const;
-
     long getY() const;
+
+    Oreal getMag() const;
+
+    Oreal getAngle() const;
+
+    bool getFlip() const;
 
 private:
     CellName* cellName;
@@ -236,8 +242,7 @@ private:
     Oreal mag, angle;
     bool flip;
     const Repetition* rep;
-    // 추가: 여러 반복된 위치를 저장할 수 있도록 벡터 추가
-    std::vector<std::pair<long, long>> repeatedPositions; // 반복된 위치들
+    std::vector<std::pair<long, long>> repeatedPositions;  // 반복된 위치 저장
 };
 
 
@@ -304,7 +309,7 @@ public:
     void beginCircle(Ulong layer, Ulong datatype, long x, long y, long radius, const Repetition* rep) override;
 
     void updateCellHierarchy(CellName* parent, CellName* child);
-    JCell* findRootCell(CellName* cellName) const;
+    JCell* findRefCell(CellName* cellName) const;
 
     // Cell BBox 계산 함수
     JLayout::BBox calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const;
