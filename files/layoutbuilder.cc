@@ -298,16 +298,7 @@ std::vector<std::pair<long, long> > JCircle::getRepeatedPositions() const
 // JText Implementation
 
 BBox JText::getBBox() const {
-    long x_min = LONG_MAX, y_min = LONG_MAX;
-    long x_max = LONG_MIN, y_max = LONG_MIN;
-
-    long textWidth = text->getName().length() * 10;  // 텍스트 폭 계산 (임시)
-    x_min = std::min(x_min, x);
-    y_min = std::min(y_min, y);
-    x_max = std::max(x_max, x + textWidth);
-    y_max = std::max(y_max, y + 20);  // 텍스트 높이 임시 값
-
-    return {x_min, y_min, x_max, y_max};
+    return {x, y, x, y};
 }
 
 
