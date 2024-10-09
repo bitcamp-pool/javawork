@@ -298,7 +298,16 @@ std::vector<std::pair<long, long> > JCircle::getRepeatedPositions() const
 // JText Implementation
 
 BBox JText::getBBox() const {
-    return {x, y, x, y};
+    long x_min = LONG_MAX, y_min = LONG_MAX;
+    long x_max = LONG_MIN, y_max = LONG_MIN;
+
+    long textWidth = text->getName().length() * 10;  // 텍스트 폭 계산 (임시)
+    x_min = std::min(x_min, x);
+    y_min = std::min(y_min, y);
+    x_max = std::max(x_max, x + textWidth);
+    y_max = std::max(y_max, y + 20);  // 텍스트 높이 임시 값
+
+    return {x_min, y_min, x_max, y_max};
 }
 
 
@@ -592,18 +601,33 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
     long x_min = LONG_MAX, y_min = LONG_MAX;
     long x_max = LONG_MIN, y_max = LONG_MIN;
 
-    // 각 shape에 대해 BBox를 계산
+    // 셀 안에 있는 모든 도형의 경계 영역(BBox)을 계산
+    // for (const auto& layerShapes : cell->getShapesByLayer()) {
+    //     for (const auto& shape : layerShapes.second) {
+    //         JLayout::BBox shapeBBox = shape->getBBox();
+    //         x_min = std::min(x_min, shapeBBox.x_min);
+    //         y_min = std::min(y_min, shapeBBox.y_min);
+    //         x_max = std::max(x_max, shapeBBox.x_max);
+    //         y_max = std::max(y_max, shapeBBox.y_max);
+    //     }
+    // }
     for (const auto& layerShapes : cell->getShapesByLayer()) {
         for (const auto& shape : layerShapes.second) {
             JLayout::BBox shapeBBox = shape->getBBox();
-            x_min = std::min(x_min, shapeBBox.x_min);
-            y_min = std::min(y_min, shapeBBox.y_min);
-            x_max = std::max(x_max, shapeBBox.x_max);
-            y_max = std::max(y_max, shapeBBox.y_max);
+            std::vector<std::pair<long, long>> repeatedPositions = shape->getRepeatedPositions();
+
+            for (const auto& pos : repeatedPositions) {
+                // 반복된 위치를 기반으로 BBox의 min/max 좌표를 갱신
+                x_min = std::min(x_min, pos.first);
+                y_min = std::min(y_min, pos.second);
+                x_max = std::max(x_max, pos.first  + (shapeBBox.x_max - shapeBBox.x_min));
+                y_max = std::max(y_max, pos.second + (shapeBBox.y_max - shapeBBox.y_min));
+            }
         }
     }
 
-    // 각 placement에 대해 BBox 계산
+
+    // 셀 안에 있는 모든 placement의 경계 영역(BBox)을 계산
     for (const auto& placement : cell->getPlacements()) {
         long placement_x_min = LONG_MAX, placement_y_min = LONG_MAX;
         long placement_x_max = LONG_MIN, placement_y_max = LONG_MIN;
@@ -686,12 +710,12 @@ void JLayoutBuilder::generateBinary() {
 // JLayoutBuilder::printLayoutInfo 함수 구현
 void JLayoutBuilder::printLayoutInfo() const {
     std::cout << std::left
-              << std::setw(10) << "Layer"    // Layer는 10칸으로, 왼쪽 정렬
-              << std::setw(50) << "Cell"     // Cell 이름은 50칸으로, 왼쪽 정렬
+              // << std::setw(10) << "Layer"    // Layer는 10칸으로, 왼쪽 정렬
+              << std::setw(70) << "Cell"     // Cell 이름은 50칸으로, 왼쪽 정렬
               << std::setw(30) << "BBox"     // BBox는 30칸으로, 왼쪽 정렬
               << std::endl;
 
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------------------------------------" << std::endl;
 
     std::unordered_set<const JCell*> visited;
 
@@ -704,20 +728,21 @@ void JLayoutBuilder::printLayoutInfo() const {
 
         // 셀 이름이 너무 길 경우 자르기
         std::string cellOutput = cellName;
-        if (cellOutput.length() > 50) {
-            cellOutput = cellOutput.substr(0, 47) + "...";
+        if (cellOutput.length() > 70) {
+            cellOutput = cellOutput.substr(0, 67) + "...";
         }
 
         // 정보 출력 (왼쪽 정렬)
         std::cout << std::left
-                  << std::setw(10) << " "  // Layer는 비워둠
-                  << std::setw(50) << cellOutput   // Cell 이름 출력
+                  // << std::setw(10) << " "  // Layer는 비워둠
+                  << std::setw(70) << cellOutput   // Cell 이름 출력
                   << std::setw(30) << "(" + std::to_string(cellBBox.x_min) + ", " + std::to_string(cellBBox.y_min) + ", "
                                           + std::to_string(cellBBox.x_max) + ", " + std::to_string(cellBBox.y_max) + ")"  // BBox 출력
                   << std::endl;
     }
 
-    std::cout << "----------------------------------------------------------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------------------------------------" << std::endl;
+
 }
 
 
