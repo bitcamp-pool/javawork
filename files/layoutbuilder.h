@@ -72,6 +72,7 @@ class JShape {
 public:
     virtual JLayout::BBox getBBox() const = 0;
     virtual void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const = 0;
+    virtual std::vector<std::pair<long, long>> getRepeatedPositions() const = 0;
     virtual ~JShape() = default;
 
     JLayout::Type getShapeType() const { return shapeType; }
@@ -93,7 +94,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y, width, height;
@@ -111,7 +112,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y, width;
@@ -129,7 +130,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y;
@@ -149,7 +150,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y;
@@ -171,7 +172,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y;
@@ -192,7 +193,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y, radius;
@@ -211,7 +212,7 @@ public:
     JLayout::BBox getBBox() const override;
     void generateBinary(OasisBuilder& builder, Ulong layer, Ulong datatype) const override;
 
-    std::vector<std::pair<long, long> > getRepeatedPositions() const;
+    std::vector<std::pair<long, long> > getRepeatedPositions() const override;
 
 private:
     long x, y;
