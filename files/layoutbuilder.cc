@@ -7,24 +7,21 @@ namespace Oasis {
 using namespace JLayout;
 
 
+Matrix2D JLayout::rotationMatrix(double angle)
+{
+    // 각도를 라디안으로 변환
+    double radians = angle * M_PI / 180.0;
 
-// Point 변환 함수 정의 (변환 로직 구현)
-std::pair<long, long> transformPoint(long x, long y, double mag, double angle, bool flip) {
-    // 스케일 적용
-    long newX = static_cast<long>(x * mag);
-    long newY = static_cast<long>(y * mag);
+    double cos_angle = cos(radians);
+    double sin_angle = sin(radians);
 
-    // 회전 각도 적용 (라디안으로 변환)
-    double rad = angle * M_PI / 180.0;
-    long rotatedX = static_cast<long>(newX * cos(rad) - newY * sin(rad));
-    long rotatedY = static_cast<long>(newX * sin(rad) + newY * cos(rad));
+    Matrix2D rotationMatrix;
+    rotationMatrix.m[0][0] =  cos_angle;
+    rotationMatrix.m[0][1] = -sin_angle;
+    rotationMatrix.m[1][0] =  sin_angle;
+    rotationMatrix.m[1][1] =  cos_angle;
 
-    // 플립 적용 (x축 또는 y축 기준 반전)
-    if (flip) {
-        rotatedX = -rotatedX;
-    }
-
-    return {rotatedX, rotatedY};
+    return rotationMatrix;
 }
 
 
@@ -194,19 +191,41 @@ std::vector<std::pair<long, long> > JSquare::getRepeatedPositions() const
 
 // JPolygon Implementation
 
+// BBox JPolygon::getBBox() const {
+//     long x_min = LONG_MAX, y_min = LONG_MAX;
+//     long x_max = LONG_MIN, y_max = LONG_MIN;
+
+//     // Calculate BBox from the points list
+//     for (const auto& point : points) {
+//         if (point.x < x_min) x_min = point.x;
+//         if (point.x > x_max) x_max = point.x;
+//         if (point.y < y_min) y_min = point.y;
+//         if (point.y > y_max) y_max = point.y;
+//     }
+//     return {x_min + x , y_min + y, x_max + x, y_max + y};
+// }
+
 BBox JPolygon::getBBox() const {
     long x_min = LONG_MAX, y_min = LONG_MAX;
     long x_max = LONG_MIN, y_max = LONG_MIN;
 
-    // Calculate BBox from the points list
+    // 각 점의 상대 좌표를 절대 좌표로 변환하여 BBox 계산
     for (const auto& point : points) {
-        if (point.x < x_min) x_min = point.x;
-        if (point.x > x_max) x_max = point.x;
-        if (point.y < y_min) y_min = point.y;
-        if (point.y > y_max) y_max = point.y;
+        long absolute_x = point.x + x;  // 시작 좌표 (x, y)를 각 점에 더해줌
+        long absolute_y = point.y + y;
+
+        if (absolute_x < x_min) x_min = absolute_x;
+        if (absolute_x > x_max) x_max = absolute_x;
+        if (absolute_y < y_min) y_min = absolute_y;
+        if (absolute_y > y_max) y_max = absolute_y;
     }
-    return {x_min + x , y_min + y, x_max + x, y_max + y};
+
+    // 절대 좌표를 기준으로 한 BBox 반환
+    return {x_min, y_min, x_max, y_max};
 }
+
+
+
 
 void JPolygon::generateBinary(OasisBuilder& creator, Ulong layer, Ulong datatype) const {
     for (const auto& pos : repeatedPositions) {
@@ -342,41 +361,7 @@ std::vector<std::pair<long, long> > JPlacement::getRepeatedPositions() const
 }
 
 
-/**
- * mag, angle, flip 변환을 적용하여 좌표를 변환하는 함수 구현
- * 변환이 적용된 좌표 목록을 반환하는 함수입니다.
- */
-std::vector<std::pair<long, long>> JPlacement::getTransformedPositions() const {
-    std::vector<std::pair<long, long>> transformedPositions;
-    transformedPositions.reserve(repeatedPositions.size());
 
-    for (const auto& pos : repeatedPositions) {
-        long transformedX = pos.first;
-        long transformedY = pos.second;
-
-        // 확대/축소 적용
-        transformedX = static_cast<long>(transformedX * mag.getValue());
-        transformedY = static_cast<long>(transformedY * mag.getValue());
-
-        // 회전 적용
-        if (angle != 0) {
-            double radians = angle.getValue() * M_PI / 180.0;  // 각도를 라디안으로 변환
-            long rotatedX = static_cast<long>(transformedX * cos(radians) - transformedY * sin(radians));
-            long rotatedY = static_cast<long>(transformedX * sin(radians) + transformedY * cos(radians));
-            transformedX = rotatedX;
-            transformedY = rotatedY;
-        }
-
-        // 뒤집기 적용
-        if (flip) {
-            transformedY = -transformedY;  // 필요에 따라 y축을 기준으로 뒤집기 (x축도 가능)
-        }
-
-        transformedPositions.emplace_back(transformedX, transformedY);
-    }
-
-    return transformedPositions;
-}
 
 
 CellName *JPlacement::getName() const
@@ -585,7 +570,7 @@ JCell* JLayoutBuilder::findRefCell(CellName* cellName) const {
 }
 
 
-// 함수 정의 수정
+
 JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const {
     // Cell의 BBox 캐시를 확인 (이미 계산된 경우)
     if (cell->getCachedBBox()) {
@@ -598,89 +583,70 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
     }
     visited.insert(cell);
 
-    long x_min = LONG_MAX, y_min = LONG_MAX;
-    long x_max = LONG_MIN, y_max = LONG_MIN;
+    JLayout::BBox cellBBox;  // 초기화된 BBox 사용
 
     // 셀 안에 있는 모든 도형의 경계 영역(BBox)을 계산
-    // for (const auto& layerShapes : cell->getShapesByLayer()) {
-    //     for (const auto& shape : layerShapes.second) {
-    //         JLayout::BBox shapeBBox = shape->getBBox();
-    //         x_min = std::min(x_min, shapeBBox.x_min);
-    //         y_min = std::min(y_min, shapeBBox.y_min);
-    //         x_max = std::max(x_max, shapeBBox.x_max);
-    //         y_max = std::max(y_max, shapeBBox.y_max);
-    //     }
-    // }
     for (const auto& layerShapes : cell->getShapesByLayer()) {
         for (const auto& shape : layerShapes.second) {
-            JLayout::BBox shapeBBox = shape->getBBox();
+            JLayout::BBox shapeBBox = shape->getBBox();  // 각 도형의 BBox
             std::vector<std::pair<long, long>> repeatedPositions = shape->getRepeatedPositions();
 
-            for (const auto& pos : repeatedPositions) {
-                // 반복된 위치를 기반으로 BBox의 min/max 좌표를 갱신
-                x_min = std::min(x_min, pos.first);
-                y_min = std::min(y_min, pos.second);
-                x_max = std::max(x_max, pos.first  + (shapeBBox.x_max - shapeBBox.x_min));
-                y_max = std::max(y_max, pos.second + (shapeBBox.y_max - shapeBBox.y_min));
+            if (repeatedPositions.size() > 1) { // 다수의 위치 처리
+                for (const auto& pos : repeatedPositions) {
+                    // 도형의 반복된 위치를 기준으로 새로운 BBox 계산
+                    JLayout::BBox transformedBBox(pos.first, pos.second, pos.first + (shapeBBox.x_max - shapeBBox.x_min), pos.second + (shapeBBox.y_max - shapeBBox.y_min));
+                    cellBBox.merge(transformedBBox);  // 병합
+                }
+            }
+            else { // 단일 위치 처리
+                cellBBox.merge(shapeBBox);
+            }
+        }
+    }
+
+    // 셀 안에 있는 모든 placement의 경계 영역(BBox)을 계산
+    for (const auto& placement : cell->getPlacements()) {
+        // 참조된 셀의 BBox를 가져와서 변환
+        const JCell* referencedCell = findRefCell(placement->getName());
+        if (referencedCell) {
+            JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);  // 참조 셀의 BBox 계산
+
+            // Placement 변환 행렬 생성 (확대, 회전, 플립 적용)
+            Matrix2D transformationMatrix = JLayout::rotationMatrix(placement->getAngle().getValue());
+
+            std::vector<std::pair<long, long>> repeatedPositions = placement->getRepeatedPositions();
+
+            if (repeatedPositions.size() > 1) {
+                // 각 반복된 위치에 대해 변환 적용
+                for (const auto& pos : repeatedPositions) {
+                    JLayout::BBox transformedBBox = referencedCellBBox.transform(transformationMatrix);
+                    transformedBBox.x_min += pos.first;
+                    transformedBBox.y_min += pos.second;
+                    transformedBBox.x_max += pos.first;
+                    transformedBBox.y_max += pos.second;
+                    cellBBox.merge(transformedBBox);
+                }
+            } else {
+                // 단일 위치일 경우 바로 병합
+                JLayout::BBox transformedBBox = referencedCellBBox.transform(transformationMatrix);
+                transformedBBox.x_min += placement->getX();
+                transformedBBox.y_min += placement->getY();
+                transformedBBox.x_max += placement->getX();
+                transformedBBox.y_max += placement->getY();
+                cellBBox.merge(transformedBBox);
             }
         }
     }
 
 
-    // 셀 안에 있는 모든 placement의 경계 영역(BBox)을 계산
-    for (const auto& placement : cell->getPlacements()) {
-        long placement_x_min = LONG_MAX, placement_y_min = LONG_MAX;
-        long placement_x_max = LONG_MIN, placement_y_max = LONG_MIN;
-
-        // repeatedPositions에서 각 위치의 min/max 값 계산
-        for (const auto& pos : placement->getRepeatedPositions()) {
-            placement_x_min = std::min(placement_x_min, pos.first);
-            placement_y_min = std::min(placement_y_min, pos.second);
-            placement_x_max = std::max(placement_x_max, pos.first);
-            placement_y_max = std::max(placement_y_max, pos.second);
-        }
-
-        // 참조된 셀의 BBox를 가져와서 placement의 좌표와 더함
-        const JCell* referencedCell = findRefCell(placement->getName());
-        if (referencedCell) {
-            JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);
-
-            // x_min = std::min(x_min, placement_x_min + referencedCellBBox.x_min);
-            // y_min = std::min(y_min, placement_y_min + referencedCellBBox.y_min);
-            // x_max = std::max(x_max, placement_x_max + referencedCellBBox.x_max);
-            // y_max = std::max(y_max, placement_y_max + referencedCellBBox.y_max);
-
-            // 네 개의 모서리 좌표 변환
-            auto transformedBottomLeft = transformPoint(referencedCellBBox.x_min, referencedCellBBox.y_min, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
-            auto transformedBottomRight = transformPoint(referencedCellBBox.x_max, referencedCellBBox.y_min, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
-            auto transformedTopLeft = transformPoint(referencedCellBBox.x_min, referencedCellBBox.y_max, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
-            auto transformedTopRight = transformPoint(referencedCellBBox.x_max, referencedCellBBox.y_max, placement->getMag().getValue(), placement->getAngle().getValue(), placement->getFlip());
-
-
-            // 변환된 좌표를 사용해 새로운 BBox 계산
-            long transformed_x_min = std::min({transformedBottomLeft.first, transformedBottomRight.first, transformedTopLeft.first, transformedTopRight.first});
-            long transformed_y_min = std::min({transformedBottomLeft.second, transformedBottomRight.second, transformedTopLeft.second, transformedTopRight.second});
-            long transformed_x_max = std::max({transformedBottomLeft.first, transformedBottomRight.first, transformedTopLeft.first, transformedTopRight.first});
-            long transformed_y_max = std::max({transformedBottomLeft.second, transformedBottomRight.second, transformedTopLeft.second, transformedTopRight.second});
-
-            // 최종 BBox에 반영
-            x_min = std::min(x_min, placement_x_min + transformed_x_min);
-            y_min = std::min(y_min, placement_y_min + transformed_y_min);
-            x_max = std::max(x_max, placement_x_max + transformed_x_max);
-            y_max = std::max(y_max, placement_y_max + transformed_y_max);
-
-        }
-    }
-
     // 계산된 BBox를 Cell에 캐싱
-    const_cast<JCell*>(cell)->setCachedBBox(std::unique_ptr<JLayout::BBox>(new JLayout::BBox{x_min, y_min, x_max, y_max}));
+    const_cast<JCell*>(cell)->setCachedBBox(std::make_unique<JLayout::BBox>(cellBBox));
 
     // visited에서 제거
     visited.erase(cell);
 
-    return {x_min, y_min, x_max, y_max};
+    return cellBBox;
 }
-
 
 
 
@@ -703,7 +669,7 @@ void JLayoutBuilder::generateBinary() {
 
     creator.endFile();
 
-    printLayoutInfo();
+    //printLayoutInfo();
 }
 
 
@@ -801,5 +767,6 @@ void JLayoutBuilder::registerXName(XName *xname)
 {
     creator.registerXName(xname);
 }
+
 
 } // namespace Oasis
