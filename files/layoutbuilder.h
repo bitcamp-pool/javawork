@@ -29,9 +29,61 @@ using SoftJin::HashPointer;
 
 namespace JLayout {
 
+
+// 행렬 구조체: 2D 변환을 위한 2x2 행렬
+struct Matrix2D {
+    double m[2][2];  // 2x2 행렬
+
+    // 좌표에 행렬 곱을 적용하는 함수
+    std::pair<long, long> multiply(long x, long y) const {
+        long new_x = static_cast<long>(m[0][0] * x + m[0][1] * y);
+        long new_y = static_cast<long>(m[1][0] * x + m[1][1] * y);
+        return {new_x, new_y};
+    }
+};
+
+// 회전 변환을 위한 행렬 생성 함수 (각도는 라디안 값으로 입력)
+Matrix2D rotationMatrix(double angle);
+
+// BBox 구조체: 도형이나 셀의 경계 영역을 정의합니다.
+// 각 좌표는 경계의 최소(min)와 최대(max) 값을 저장합니다.
 struct BBox {
     long x_min, y_min, x_max, y_max;
+
+    // 기본 생성자: 최댓값과 최솟값으로 초기화
+    BBox() : x_min(LONG_MAX), y_min(LONG_MAX), x_max(LONG_MIN), y_max(LONG_MIN) {}
+
+    // 인자를 받는 생성자
+    BBox(long x_min, long y_min, long x_max, long y_max)
+        : x_min(x_min), y_min(y_min), x_max(x_max), y_max(y_max) {}
+
+    // 두 BBox 간의 병합 함수: 두 BBox를 합쳐서 더 큰 영역을 커버하는 BBox 생성
+    void merge(const BBox& other) {
+        x_min = std::min(x_min, other.x_min);
+        y_min = std::min(y_min, other.y_min);
+        x_max = std::max(x_max, other.x_max);
+        y_max = std::max(y_max, other.y_max);
+    }
+
+    // 좌표 변환을 적용하여 새로운 BBox를 계산하는 함수
+    BBox transform(const Matrix2D& matrix) const {
+        auto [x1, y1] = matrix.multiply(x_min, y_min);
+        auto [x2, y2] = matrix.multiply(x_max, y_min);
+        auto [x3, y3] = matrix.multiply(x_min, y_max);
+        auto [x4, y4] = matrix.multiply(x_max, y_max);
+
+        long new_x_min = std::min({x1, x2, x3, x4});
+        long new_y_min = std::min({y1, y2, y3, y4});
+        long new_x_max = std::max({x1, x2, x3, x4});
+        long new_y_max = std::max({y1, y2, y3, y4});
+
+        return {new_x_min, new_y_min, new_x_max, new_y_max};
+    }
 };
+
+
+
+
 
 enum Type { Rectangle, Square, Polygon, Path, Trapezoid, Circle, Text };
 
@@ -57,9 +109,6 @@ public:
 
 // Repetition 처리 함수
 void unpackRepetition(long x, long y, const Repetition* rep, std::vector<std::pair<long, long>>& positions);
-
-// Point 변환 함수 선언
-std::pair<long, long> transformPoint(long x, long y, const Oreal& mag, const Oreal& angle, bool flip);
 
 }  // namespace JLayout
 
@@ -228,16 +277,13 @@ public:
     void generateBinary(OasisBuilder& builder) const;
 
     std::vector<std::pair<long, long>> getRepeatedPositions() const;
-    std::vector<std::pair<long, long>> getTransformedPositions() const;  // 변환된 좌표를 반환하는 함수 추가
+
     CellName* getName() const;
 
     long getX() const;
     long getY() const;
-
     Oreal getMag() const;
-
     Oreal getAngle() const;
-
     bool getFlip() const;
 
 private:
