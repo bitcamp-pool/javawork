@@ -189,21 +189,6 @@ std::vector<std::pair<long, long> > JSquare::getRepeatedPositions() const
     return repeatedPositions;
 }
 
-// JPolygon Implementation
-
-// BBox JPolygon::getBBox() const {
-//     long x_min = LONG_MAX, y_min = LONG_MAX;
-//     long x_max = LONG_MIN, y_max = LONG_MIN;
-
-//     // Calculate BBox from the points list
-//     for (const auto& point : points) {
-//         if (point.x < x_min) x_min = point.x;
-//         if (point.x > x_max) x_max = point.x;
-//         if (point.y < y_min) y_min = point.y;
-//         if (point.y > y_max) y_max = point.y;
-//     }
-//     return {x_min + x , y_min + y, x_max + x, y_max + y};
-// }
 
 BBox JPolygon::getBBox() const {
     long x_min = LONG_MAX, y_min = LONG_MAX;
@@ -604,36 +589,27 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
         }
     }
 
+
     // 셀 안에 있는 모든 placement의 경계 영역(BBox)을 계산
     for (const auto& placement : cell->getPlacements()) {
-        // 참조된 셀의 BBox를 가져와서 변환
+        // 참조된 셀의 BBox를 가져옴
         const JCell* referencedCell = findRefCell(placement->getName());
         if (referencedCell) {
-            JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);  // 참조 셀의 BBox 계산
+            // 참조 셀의 BBox를 먼저 계산
+            JLayout::BBox referencedCellBBox = calculateCellBBox(referencedCell, visited);
 
             // Placement 변환 행렬 생성 (확대, 회전, 플립 적용)
             Matrix2D transformationMatrix = JLayout::rotationMatrix(placement->getAngle().getValue());
+            double mag = placement->getMag().getValue();
+            bool flip = placement->getFlip();
 
+            // 반복된 위치들에 대해 BBox 계산
             std::vector<std::pair<long, long>> repeatedPositions = placement->getRepeatedPositions();
 
-            if (repeatedPositions.size() > 1) {
-                // 각 반복된 위치에 대해 변환 적용
-                for (const auto& pos : repeatedPositions) {
-                    JLayout::BBox transformedBBox = referencedCellBBox.transform(transformationMatrix);
-                    transformedBBox.x_min += pos.first;
-                    transformedBBox.y_min += pos.second;
-                    transformedBBox.x_max += pos.first;
-                    transformedBBox.y_max += pos.second;
-                    cellBBox.merge(transformedBBox);
-                }
-            } else {
-                // 단일 위치일 경우 바로 병합
-                JLayout::BBox transformedBBox = referencedCellBBox.transform(transformationMatrix);
-                transformedBBox.x_min += placement->getX();
-                transformedBBox.y_min += placement->getY();
-                transformedBBox.x_max += placement->getX();
-                transformedBBox.y_max += placement->getY();
-                cellBBox.merge(transformedBBox);
+            for (const auto& pos : repeatedPositions) {
+                // 반복된 위치마다 변환을 적용하고 BBox 계산
+                JLayout::BBox transformedBBox = referencedCellBBox.transform(transformationMatrix, mag, flip, pos.first, pos.second);
+                cellBBox.merge(transformedBBox);  // 최종 BBox 병합
             }
         }
     }
