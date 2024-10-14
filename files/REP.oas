@@ -1,21 +1,19 @@
 START "1.0" 1000.0 1
 
-CELL 28
-CBLOCK 0 9 11
-PLACEMENT 0xf0 refnum 109 x 495520 y 668935
-END_CBLOCK
-
-CELL 5
-CBLOCK 0 20 23
+CELL 11
 RECTANGLE 0x7f layer 2 datatype 2 width 20354 height 40354 x 2000 y 8590 
         rep 2 0 24354
-END_CBLOCK
 
-CELL 109
-CBLOCK 0 26 24
-PLACEMENT 0xe8 refnum 5 x 363572 rep 2 4 48708
+CELL 44
+PLACEMENT 0xe8 refnum 11 x 363572 rep 2 4 48708
 PLACEMENT 0x28 x 1500 rep 5 3 12 4059 4059 4059 4059
-END_CBLOCK
+
+CELL 66
+PLACEMENT 0xc0 refnum 114
+RECTANGLE 0x63 layer 2 datatype 2 width 2193130 height 725140 
+
+CELL 114
+PLACEMENT 0xf0 refnum 44 x 767905 y 668935
 
 PROPNAME_TABLE
 PROPNAME "S_GDS_PROPERTY" 0
@@ -23,19 +21,19 @@ PROPNAME "S_CELL_OFFSET" 1
 PROPNAME "S_BOUNDING_BOX" 2
 
 CELLNAME_TABLE
-CELLNAME "mram_8mb_6101_105C_CP_UNIT_0p25xCAPA" 5
-PROPERTY 0x17 refnum 1 standard values 1 8 63
-CELLNAME "lnm28fds_mram_2048x78m64_6101_105C" 28
+CELLNAME "mram_6101_eg_125c_CP_UNIT_0p25xCAPA" 11
 PROPERTY 0x17 refnum 1 standard values 1 8 28
-CELLNAME "mram_8mb_6101_105CP" 109
-PROPERTY 0x17 refnum 1 standard values 1 8 110
-END 1 208 1 0 1 158 1 0 1 0 1 0 none
+CELLNAME "mram_6101_eg_125c_CP" 44
+PROPERTY 0x17 refnum 1 standard values 1 8 50
+CELLNAME "lnm28fds_mram_2048x78m64_6101_eg_125C" 66
+PROPERTY 0x17 refnum 1 standard values 1 8 78
+CELLNAME "mram_6101_eg_125c_lnm28fds_mram2048x78m64_6101_eg_125C_base" 114
+PROPERTY 0x17 refnum 1 standard values 1 8 94
+END 1 155 1 0 1 105 1 0 1 0 1 0 none
+
+lnm28fds_mram_2048x78m64_6101_eg_125C (0, 0) (2193.13, 725.14)
+        mram_6101_eg_125c_lnm28fds_mram2048x78m64_6101_eg_125C_base (771.405, 677.525) (1421.725, 717.879)
+                mram_6101_eg_125c_CP (3.5, 8.59) (653.82, 48.944)
+                        mram_6101_eg_125c_CP_UNIT_0p25xCAPA (2, 8.59) (46.708, 48.944)
 
 
-
-PLACEMENT 
-infobytes refnum         x         y     repType      dim   grid     space      delta
-CNXYRAAF
-f8          1          4160      3740      1          3,3         3000, 10000 
-            0                              11          1    10       g-delta2  dx, dy
-f8          6                              2           1             6100 
