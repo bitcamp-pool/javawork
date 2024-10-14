@@ -65,20 +65,34 @@ struct BBox {
         y_max = std::max(y_max, other.y_max);
     }
 
-    // 좌표 변환을 적용하여 새로운 BBox를 계산하는 함수
-    BBox transform(const Matrix2D& matrix) const {
-        auto [x1, y1] = matrix.multiply(x_min, y_min);
-        auto [x2, y2] = matrix.multiply(x_max, y_min);
-        auto [x3, y3] = matrix.multiply(x_min, y_max);
-        auto [x4, y4] = matrix.multiply(x_max, y_max);
+    BBox transform(const Matrix2D& matrix, double mag, bool flip, long offsetX, long offsetY) const {
+        // 1. Flip 처리: Y축 반전 적용
+        long y_min_flipped = flip ? -y_max : y_min;
+        long y_max_flipped = flip ? -y_min : y_max;
 
-        long new_x_min = std::min({x1, x2, x3, x4});
-        long new_y_min = std::min({y1, y2, y3, y4});
-        long new_x_max = std::max({x1, x2, x3, x4});
-        long new_y_max = std::max({y1, y2, y3, y4});
+        // 2. Magnification 적용
+        long scaled_x_min = static_cast<long>(x_min * mag);
+        long scaled_x_max = static_cast<long>(x_max * mag);
+        long scaled_y_min = static_cast<long>(y_min_flipped * mag);
+        long scaled_y_max = static_cast<long>(y_max_flipped * mag);
 
-        return {new_x_min, new_y_min, new_x_max, new_y_max};
+        // 3. 회전 적용
+        std::pair<long, long> point1 = matrix.multiply(scaled_x_min, scaled_y_min);
+        std::pair<long, long> point2 = matrix.multiply(scaled_x_max, scaled_y_min);
+        std::pair<long, long> point3 = matrix.multiply(scaled_x_min, scaled_y_max);
+        std::pair<long, long> point4 = matrix.multiply(scaled_x_max, scaled_y_max);
+
+        // 4. Offset 적용
+        long new_x_min = std::min({point1.first, point2.first, point3.first, point4.first}) + offsetX;
+        long new_y_min = std::min({point1.second, point2.second, point3.second, point4.second}) + offsetY;
+        long new_x_max = std::max({point1.first, point2.first, point3.first, point4.first}) + offsetX;
+        long new_y_max = std::max({point1.second, point2.second, point3.second, point4.second}) + offsetY;
+
+        return BBox(new_x_min, new_y_min, new_x_max, new_y_max);
     }
+
+
+
 };
 
 
