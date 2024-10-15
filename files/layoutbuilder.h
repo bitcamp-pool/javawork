@@ -375,6 +375,15 @@ public:
     void updateCellHierarchy(CellName* parent, CellName* child);
     JCell* findRefCell(CellName* cellName) const;
 
+    // Primitive Cell의 BBox를 먼저 계산하는 함수
+    void calculatePrimitiveCellBBoxes();
+
+    // 모든 CELL의 BBox를 계산하는 함수 (참조 셀 포함)
+    void calculateAllCellBBoxes();
+
+    // Primitive Cell인지 확인하는 함수
+    bool isPrimitiveCell(const JCell* cell) const;
+
     // Cell BBox 계산 함수
     JLayout::BBox calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const;
 
@@ -382,8 +391,7 @@ public:
     void generateBinary();
 
     // 레이아웃 정보를 터미널 출력하는 함수
-    void printLayoutCellBBoxes() const;
-    void printLayoutBBoxesByLayer() const;
+    void printLayoutInfo() const;
 
 private:
     OasisBuilder& creator;
