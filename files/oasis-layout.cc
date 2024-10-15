@@ -49,7 +49,8 @@ void displayMenu() {
     std::cout << "[Menu]\n";
     std::cout << "1. Print BBox of a Specific TOP CELL\n";
     std::cout << "2. Print BBoxes of All Cells\n";
-    std::cout << "3. Exit\n";
+    std::cout << "3. Print BBoxes of Layers\n";
+    std::cout << "4. Exit\n";
     std::cout << "Enter your choice: ";
 }
 
@@ -73,9 +74,12 @@ void printSpecificTopCellBBox(JLayoutBuilder& layoutBuilder) {
 
 // 전체 셀의 BBox 출력 함수
 void printAllCellBBoxes(const JLayoutBuilder& layoutBuilder) {
-    layoutBuilder.printLayoutInfo();
+    layoutBuilder.printLayoutCellBBoxes();
 }
 
+void printBBoxesByLayer(const JLayoutBuilder& layoutBuilder) {
+    layoutBuilder.printLayoutBBoxesByLayer();
+}
 
 int main(int argc, char* argv[]) {
     SetProgramName(argv[0]);
@@ -152,13 +156,17 @@ int main(int argc, char* argv[]) {
                 printAllCellBBoxes(layoutBuilder);
                 break;
             case 3:
+                std::cout << endl;
+                printBBoxesByLayer(layoutBuilder);
+                break;                
+            case 4:
                 std::cout << "Exiting the program.\n";
                 break;
             default:
                 std::cout << "Invalid choice. Please try again.\n";
                 break;
             }
-        } while (choice != 3);
+        } while (choice != 4);
     } catch (const std::exception& exc) {
         FatalError("%s", exc.what());
     }
