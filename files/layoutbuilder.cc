@@ -477,6 +477,7 @@ void JLayoutBuilder::endCell() {
 void JLayoutBuilder::endFile()
 {
     generateBinary();
+
 }
 
 void JLayoutBuilder::beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) {
@@ -556,8 +557,41 @@ JCell* JLayoutBuilder::findRefCell(CellName* cellName) const {
 
 
 
+// Primitive Cell 여부 확인: placements가 없으면 Primitive Cell
+bool JLayoutBuilder::isPrimitiveCell(const JCell* cell) const {
+    return cell->getPlacements().empty();
+}
+
+// 모든 Primitive Cell의 BBox 계산
+void JLayoutBuilder::calculatePrimitiveCellBBoxes() {
+    std::unordered_set<const JCell*> visited;
+
+    for (const auto& cellPair : cells) {
+        JCell* cell = cellPair.second.get();
+        if (isPrimitiveCell(cell)) {
+            calculateCellBBox(cell, visited);  // BBox 계산 후 캐시
+        }
+    }
+}
+
+// 모든 셀의 BBox를 계산 (참조 셀 포함)
+void JLayoutBuilder::calculateAllCellBBoxes() {
+    calculatePrimitiveCellBBoxes();  // Primitive Cell BBox 먼저 계산
+
+    std::unordered_set<const JCell*> visited;
+
+    for (const auto& cellPair : cells) {
+        JCell* cell = cellPair.second.get();
+        if (!isPrimitiveCell(cell)) {
+            calculateCellBBox(cell, visited);  // 참조 셀에 대한 BBox 계산
+        }
+    }
+}
+
+
+// 셀의 BBox 계산 및 캐싱
 JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordered_set<const JCell*>& visited) const {
-    // Cell의 BBox 캐시를 확인 (이미 계산된 경우)
+    // 이미 캐싱된 BBox가 있으면 재사용
     if (cell->getCachedBBox()) {
         return *(cell->getCachedBBox());
     }
@@ -614,12 +648,8 @@ JLayout::BBox JLayoutBuilder::calculateCellBBox(const JCell* cell, std::unordere
         }
     }
 
-
-    // 계산된 BBox를 Cell에 캐싱
-    const_cast<JCell*>(cell)->setCachedBBox(std::make_unique<JLayout::BBox>(cellBBox));
-
-    // visited에서 제거
-    visited.erase(cell);
+    const_cast<JCell*>(cell)->setCachedBBox(std::make_unique<JLayout::BBox>(cellBBox)); // 계산된 BBox를 Cell에 캐싱
+    visited.erase(cell); // visited에서 제거
 
     return cellBBox;
 }
@@ -650,7 +680,7 @@ void JLayoutBuilder::generateBinary() {
 
 
 // JLayoutBuilder::printLayoutInfo 함수 구현
-void JLayoutBuilder::printLayoutCellBBoxes() const {
+void JLayoutBuilder::printLayoutInfo() const {
     std::cout << std::left
               // << std::setw(10) << "Layer"    // Layer는 10칸으로, 왼쪽 정렬
               << std::setw(70) << "Cell"     // Cell 이름은 50칸으로, 왼쪽 정렬
@@ -666,7 +696,7 @@ void JLayoutBuilder::printLayoutCellBBoxes() const {
         JCell* cell = cellPair.second.get();
         std::string cellName = cell->getName()->getName();  // 셀 이름 가져오기
 
-        JLayout::BBox cellBBox = calculateCellBBox(cell, visited);  // Cell의 BBox 계산
+        JLayout::BBox cellBBox = *(cell->getCachedBBox());
 
         // 셀 이름이 너무 길 경우 자르기
         std::string cellOutput = cellName;
@@ -681,56 +711,6 @@ void JLayoutBuilder::printLayoutCellBBoxes() const {
                   << std::setw(30) << "(" + std::to_string(cellBBox.x_min) + ", " + std::to_string(cellBBox.y_min) + ", "
                                           + std::to_string(cellBBox.x_max) + ", " + std::to_string(cellBBox.y_max) + ")"  // BBox 출력
                   << std::endl;
-    }
-
-    std::cout << "------------------------------------------------------------------------------------------------------------------------" << std::endl;
-
-}
-
-void JLayoutBuilder::printLayoutBBoxesByLayer() const {
-    std::cout << std::left
-              << std::setw(10) << "Layer"    // Layer는 10칸으로, 왼쪽 정렬
-              << std::setw(70) << "Cell"     // Cell 이름은 50칸으로, 왼쪽 정렬
-              << std::setw(20) << "Type"
-              << std::setw(30) << "BBox"     // BBox는 30칸으로, 왼쪽 정렬
-              << std::endl;
-
-    std::cout << "------------------------------------------------------------------------------------------------------------------------" << std::endl;
-
-    std::unordered_set<const JCell*> visited;
-
-    // 셀 정보 출력
-    for (const auto& cellPair : cells) {
-        JCell* cell = cellPair.second.get();
-        std::string cellName = cell->getName()->getName();  // 셀 이름 가져오기
-        auto shapeBylayer = cell->getShapesByLayer();
-
-        for (const auto& shapePair : shapesBylayer) {
-            std::string layerName = std::to_string(shapePair.first.layer) + "." + std::to_string(shapePair.first.datatype);
-            auto shapes = shapePair.second;
-            for (auto & shape : shapes) {
-                auto type = shape->getShapeType();
-                JLayout::BBox bbox = shape->getBBox();
-               
-        
-                // 셀 이름이 너무 길 경우 자르기
-                std::string cellOutput = cellName;
-                if (cellOutput.length() > 70) {
-                    cellOutput = cellOutput.substr(0, 67) + "...";
-                }
-        
-                // 정보 출력 (왼쪽 정렬)
-                std::cout << std::left
-                          << std::setw(10) << layerName
-                          << std::setw(70) << cellOutput   // Cell 이름 출력
-                          << std::setw(20) << type
-                          << std::setw(30) << "(" + std::to_string(bbox.x_min) + ", " + std::to_string(bbox.y_min) + ", "
-                                                  + std::to_string(bbox.x_max) + ", " + std::to_string(bbox.y_max) + ")"  // BBox 출력
-                          << std::endl;
-
-                
-            }
-        }
     }
 
     std::cout << "------------------------------------------------------------------------------------------------------------------------" << std::endl;
