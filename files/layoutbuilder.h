@@ -382,7 +382,8 @@ public:
     void generateBinary();
 
     // 레이아웃 정보를 터미널 출력하는 함수
-    void printLayoutInfo() const;
+    void printLayoutCellBBoxes() const;
+    void printLayoutBBoxesByLayer() const;
 
 private:
     OasisBuilder& creator;
