@@ -10,17 +10,102 @@
 이름:최지혜
 주소: 서울시 강남구
 ---------------------
-- Cell의 bbox 구하기 : 트리 트레버스(중복계산 x) 
-  haslayer
-  get bbox(layer)
-  delete layer
-  copy layer
-  Modify Layer
-  writeOasisFile
-  export
-- 객체 분리
-  Cellbuilder : 
 
-- LayoutBuilder : (beginCell~ endCell) Cellbuilder
-- Layout : 파일 정보, cells, topcell*;
+[목적] 
+Laypop에 입력되는 oasis file의 구성 요소 중 성능에 영향을 주는 인자를 찾는 방법
+
+[SW 조건]
+1. layout format 중 oasis만 입력 대상
+2. 도형 및 placement를 메모리에 저장하면 안됨
+3. 도형/placement 개수 산출 시 repeation을 해제하면 안됨. 해제 없이 개수만 증가
+4. 통계 추출을 위한 구조체만 메모리에 새로 생성(cell별 구조체 생성은 OK, layer별 구조체는 필요 없음)
+5. 숫자는 모두 long long
+6. 출력 파일은 out.csv 형식
+
+Usage : anuvad-analysis in.oas out.csv
+
+[출력 text 파일 예시 및 설명]
+name, value
+filename, ...          input file name
+TAT(s), ...            분석 수행 시간(초)
+filesize(MB), ...      (MB)    
+#cells,                oasis내 전체 cell 개수 등 Laypop showinfo 결과와 동일
+#layers,             
+#shapes, 
+#refs, 
+cblock, ...
+strict, 
+#text,                 text 개수
+#rectangle             
+#polygon
+#path
+#trapezoid
+#ctrapezoid
+#circle
+#xgeometry
+#property,             property 개수
+#cell_empty,           cell내부에 shapes과 placement가 없는 cell의 개수
+#cell_mixed,           placement와 shapes이 모두 있는  cell의 개수 
+#cell_noshape,         placement만 있고, shapes이 없는 cell의 개수
+#cell_primitive,       placement가 없고, shapes만 있는 cell의 개수
+xyrelative,            cell들 중에서 한 번이라도 선언된 적이 있으면 1, 없으면 0 
+xyabsolute,            cell들 중에서 한 번이라도 선어된 적이 있으면 1, 없으면 0
+
+#maxrefs,              모든 cell을 순회하면서 cell이 가지고 있는 refs의 개수 중 max
+#maxshapes,            모든 cell을 순회, cell내 모든 layer를 순회하면서 layer 중 가장 많은 shapes 개수
+#maxshapes-all-layer,  모든 cell을 순회, cell이 갖는 shapes 가장 큰 값    
+
+cell_maxrefs,          maxfefs를 갖고 있는 cell 이름
+cell_maxshapes,        maxshapes을 갖고 있는 cell 이름
+layer_maxshapes,       maxshapes을 갖고 있는 cell의 layer
+cell_maxshapes-all-layer, maxshapes-all-layer를 갖고 있는 cell 이름
+
+#maxcellsize,         가장 큰 cellsize(cell 시작과 끝의 파일내 거리)
+#avgcellsize,         평균 cellsize(empty cell 제외)
+#mincellsize,         가장 작은 cell size(empty cell 제외)
+
+cell_maxcellsize,     가장 큰 cellsize를 갖고 있는 cell
+cell_mincellsize,     가장 작은 cell size를 갖고 있는 cell(empty cell제외)
+
+#cellsize-interval,   (maxcellsize - mincellsize) / 10
+#cellsize01 :(mincellsize+cellsize-interval*0)  <= && < (mincellsize+cellsize-interval*1)에 속하는 cell 개수
+~
+#cellsize10 : (mincellsize+cellsize-interval*9) <= && < (mincellsize+cellsize-interval*10)에 속하는 cell 개수
+
+#srep-00 : shapes 중 repeatition 00이 나온 회수
+~
+​#srep-11 : shapes 중 해당 repeatition 11이 나온 회수
+
+#sum-srep-00 : shapes 중 repeatition 00이 나온 회수의 총합(repeation 해제 시 개수를 계속 합산)
+~
+#sum-srep-11 : shapes 중 repeatition 11이 나온 회수의 총합(repeation 해제 시 개수를 계속 합산)
+
+#prep-00 : placement 중 ...
+~
+#prep-11 : placement 중 ...
+
+#sum-prep-00 : placement 중 ...
+~
+#sum-prep-11 :  placement 중 ...
+
+#maxplist : 
+cell_maxplist :
+layer_maxplist : 
+#plist-00-02 : 4각형? , plist가 2이내 나온 회수
+#plist-03-04 : plist가 3, 4로 나온 회수
+#plist-05-14 : plist가 5부터 14이내로 나온 회수
+#plist-15-62 : plist가 15부터 62이내로 나온 회수
+#plist-63-xx : plist가 63이상인 회수
+
+
+
+
+
+
+
+
+
+...
+
+
 
