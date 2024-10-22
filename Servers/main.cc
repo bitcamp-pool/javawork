@@ -1,3 +1,16 @@
+/*
+/anuvad-analysis
+│
+├── main.cc              // 메인 엔트리 포인트
+├── analyzer.h           // 분석기 클래스 정의
+├── analyzer.cc          // 분석기 클래스 구현
+├── csv_writer.h         // CSV 출력 클래스 정의
+├── csv_writer.cc        // CSV 출력 클래스 구현
+├── CMakeLists.txt       // CMake 빌드 스크립트 (빌드 자동화)
+└── include/oasis        // 파서 및 관련 소스 (이미 업로드된 parser, printer 포함)
+
+*/
+
 #include <iostream>
 #include <chrono>
 #include "parser.h"
