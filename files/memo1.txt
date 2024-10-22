@@ -24,26 +24,26 @@ Laypop에 입력되는 oasis file의 구성 요소 중 성능에 영향을 주�
 
 Usage : anuvad-analysis in.oas out.csv
 
-[출력 text 파일 예시 및 설명]
+[출력 .csv 파일 예시 및 설명]
 name, value
 filename, ...          input file name
 TAT(s), ...            분석 수행 시간(초)
 filesize(MB), ...      (MB)    
-#cells,                oasis내 전체 cell 개수 등 Laypop showinfo 결과와 동일
-#layers,             
-#shapes, 
-#refs, 
-cblock, ...
-strict, 
-#text,                 text 개수
-#rectangle             
-#polygon
-#path
-#trapezoid
-#ctrapezoid
-#circle
-#xgeometry
-#property,             property 개수
+#cells,                oasis내 전체 cell 개수
+#layers,               layer 개수
+#shapes,               도형 개수
+#refs,                 참조 개수
+cblock, ...            on/off 여부
+strict,                on/off 여부
+#text,                 전체 개수
+#rectangle             전체 개수
+#polygon               전체 개수 
+#path                  전체 개수  
+#trapezoid             전체 개수 
+#ctrapezoid            전체 개수
+#circle                전체 개수
+#xgeometry             전체 개수 
+#property,             전체 개수
 #cell_empty,           cell내부에 shapes과 placement가 없는 cell의 개수
 #cell_mixed,           placement와 shapes이 모두 있는  cell의 개수 
 #cell_noshape,         placement만 있고, shapes이 없는 cell의 개수
@@ -60,12 +60,12 @@ cell_maxshapes,        maxshapes을 갖고 있는 cell 이름
 layer_maxshapes,       maxshapes을 갖고 있는 cell의 layer
 cell_maxshapes-all-layer, maxshapes-all-layer를 갖고 있는 cell 이름
 
-#maxcellsize,         가장 큰 cellsize(cell 시작과 끝의 파일내 거리)
+#maxcellsize,         가장 큰 cellsize(cell 시작과 끝의 총 파일 사이즈(단위: bytes))
 #avgcellsize,         평균 cellsize(empty cell 제외)
 #mincellsize,         가장 작은 cell size(empty cell 제외)
 
-cell_maxcellsize,     가장 큰 cellsize를 갖고 있는 cell
-cell_mincellsize,     가장 작은 cell size를 갖고 있는 cell(empty cell제외)
+cell_maxcellsize,     가장 큰 cellsize를 갖고 있는 cell 이름
+cell_mincellsize,     가장 작은 cell size를 갖고 있는 cell 이름(empty cell제외)
 
 #cellsize-interval,   (maxcellsize - mincellsize) / 10
 #cellsize01 :(mincellsize+cellsize-interval*0)  <= && < (mincellsize+cellsize-interval*1)에 속하는 cell 개수
