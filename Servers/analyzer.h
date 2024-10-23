@@ -23,55 +23,91 @@
 
 
 
-#ifndef ANALYZER_H
-#define ANALYZER_H
+// analyzer.h -- OASIS 파일 성능 분석기
+//
+// last modified:   23-Oct-2024  Wed
+// Copyright (c) 2004 SoftJin Infotech Private Ltd.
 
-#include <unordered_map>
-#include <string>
+#ifndef OASIS_ANALYZER_H_INCLUDED
+#define OASIS_ANALYZER_H_INCLUDED
+
 #include <vector>
-#include <limits>
+#include <string>
 #include <set>
+#include <limits>
 #include "builder.h"
+
+namespace Oasis {
+
+using std::string;
+using std::vector;
+using std::set;
+using SoftJin::Ulong;
+
+struct CellInfo {
+    string name;                   // Cell 이름
+    long long numShapes = 0;        // 도형 개수 (반복 해제 안함)
+    long long numShapesExpand = 0;  // 반복 해제 시 도형 개수
+    long long numRefs = 0;          // 참조(placement) 개수 (반복 해제 안함)
+    long long numRefsExpand = 0;    // 반복 해제 시 참조 개수
+    long long cellSize = 0;         // Cell의 크기 (bytes)
+    long long maxLayerShapes = 0;   // 특정 Layer의 최대 도형 수
+};
 
 struct Statistics {
     long long totalCells = 0;
     long long totalLayers = 0;
     long long totalShapes = 0;
+    long long totalShapesExpand = 0;
     long long totalPlacements = 0;
+    long long totalPlacementsExpand = 0;
     long long totalText = 0;
 
     long long maxRefs = 0;
     long long maxShapesPerLayer = 0;
     long long maxShapesInCell = 0;
-    
-    std::string cellWithMaxRefs;
-    std::string cellWithMaxShapes;
-    
-    std::set<int> xyrelative, xyabsolute;
 
-    std::vector<long long> plistCounts = {0, 0, 0, 0, 0};  // 00-02, 03-04, 05-14, 15-62, 63 이상
+    string cellWithMaxRefs;
+    string cellWithMaxShapes;
+
+    set<int> xyrelative, xyabsolute;
+
+    long long maxCellSize = 0;
+    long long minCellSize = std::numeric_limits<long long>::max();
+    long long totalCellSize = 0;
+
+    vector<long long> cellSizeBins = vector<long long>(10, 0);
+    vector<long long> plistCounts = vector<long long>(5, 0);
 };
 
-class Analyzer : public Oasis::OasisBuilder {
+class Analyzer : public OasisBuilder {
 public:
     Analyzer();
-    void beginCell(Oasis::CellName* cellName) override;
-    void endCell() override;
-    
-    void beginRectangle(Oasis::Ulong, Oasis::Ulong, long, long, long, long, const Oasis::Repetition*) override;
-    void beginText(Oasis::Ulong, Oasis::Ulong, long, long, const std::string&, const Oasis::Repetition*) override;
-    void beginPlacement(Oasis::CellName*, long, long, const Oasis::Repetition*) override;
+    virtual ~Analyzer();
 
     const Statistics& getStatistics() const;
+    void exportToCSV(const string& filename, const string& inputFilename, double elapsedTime, long long fileSizeMB) const;
+
+    // OASISBuilder 메서드 오버라이드
+    void beginFile(const std::string& version, const Oreal& unit, Validation::Scheme valScheme) override;
+    void endFile() override;
+    void beginCell(CellName* cellName) override;
+    void endCell() override;
+    void beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) override;
+    void beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) override;
+    void beginPolygon(Ulong layer, Ulong datatype, long x, long y, const PointList& ptlist, const Repetition* rep) override;
 
 private:
-    Statistics stats;
-    std::string currentCellName;
-    long long currentCellRefs = 0;
-    long long currentCellShapes = 0;
+    vector<CellInfo> cells;         // Cell 정보를 저장하는 벡터
+    Statistics stats;               // 전체 통계 정보
 
-    void updateMaxRefs();
-    void updateMaxShapes();
+    string currentCellName;         // 현재 분석 중인 Cell 이름
+    long long currentCellShapes = 0;
+    long long currentCellRefs = 0;
+
+    void updateMaxValues();
 };
 
-#endif  // ANALYZER_H
+}  // namespace Oasis
+
+#endif  // OASIS_ANALYZER_H_INCLUDED
