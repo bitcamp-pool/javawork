@@ -26,24 +26,26 @@ Usage : anuvad-analysis in.oas out.csv
 
 [출력 .csv 파일 예시 및 설명]
 name, value
-filename, ...          input file name
-TAT(s), ...            분석 수행 시간(초)
-filesize(MB), ...      (MB)    
+filename,              input file name
+TAT(s),                분석 수행 시간(초)
+filesize(MB),          file size를 MB단위 출력(MB)    
 #cells,                oasis내 전체 cell 개수
-#layers,               layer 개수
-#shapes,               도형 개수
-#refs,                 참조 개수
-cblock, ...            on/off 여부
+#layers,               oasis내 전체 layer.datatype의 개수
+#shapes,               geometry(도형) 개수(repeat 고려 안함)
+#shapes_expand,        geometry(도형) 개수(repeat 해제 시 개수)
+#refs,                 참조(placement) 개수(repeat 고려 안함)
+#refs_expand,          참조(placement) 개수(repeat 해제 시 개수)
+cblock,                on/off 여부
 strict,                on/off 여부
-#text,                 전체 개수
-#rectangle             전체 개수
-#polygon               전체 개수 
-#path                  전체 개수  
-#trapezoid             전체 개수 
-#ctrapezoid            전체 개수
-#circle                전체 개수
-#xgeometry             전체 개수 
-#property,             전체 개수
+#text,                 text 개수
+#rectangle             geometry 중 rectangle 개수(repeat 고려 안함)
+#polygon               geometry 중 polygon 개수(repeat 고려 안함) 
+#path                  geometry 중 path 개수(repeat 고려 안함)  
+#trapezoid             geometry 중 trapezoid 개수(repeat 고려 안함) 
+#ctrapezoid            geometry 중 ctrapezoid 개수(repeat 고려 안함)
+#circle                geometry 중 circle 개수(repeat 고려 안함)
+#xgeometry             geometry 중 xgeometry 개수(repeat 고려 안함) 
+#property,             prepoty 개수
 #cell_empty,           cell내부에 shapes과 placement가 없는 cell의 개수
 #cell_mixed,           placement와 shapes이 모두 있는  cell의 개수 
 #cell_noshape,         placement만 있고, shapes이 없는 cell의 개수
@@ -52,50 +54,93 @@ xyrelative,            cell들 중에서 한 번이라도 선언된 적이 있�
 xyabsolute,            cell들 중에서 한 번이라도 선어된 적이 있으면 1, 없으면 0
 
 #maxrefs,              모든 cell을 순회하면서 cell이 가지고 있는 refs의 개수 중 max
-#maxshapes,            모든 cell을 순회, cell내 모든 layer를 순회하면서 layer 중 가장 많은 shapes 개수
-#maxshapes-all-layer,  모든 cell을 순회, cell이 갖는 shapes 가장 큰 값    
+#maxshapes_a_layer,    모든 cell을 순회, cell내 모든 layer를 순회하면서 layer 중 가장 많은 shapes 개수
+#maxshapes_all_layer,  모든 cell을 순회, cell이 갖는 #shapes(모든 layer의 합) 가장 큰 값    
 
-cell_maxrefs,          maxfefs를 갖고 있는 cell 이름
-cell_maxshapes,        maxshapes을 갖고 있는 cell 이름
-layer_maxshapes,       maxshapes을 갖고 있는 cell의 layer
-cell_maxshapes-all-layer, maxshapes-all-layer를 갖고 있는 cell 이름
+cell_maxrefs,             maxfefs를 갖고 있는 cell 이름
+cell_maxshapes_a_layer,   maxshapes_a_layer를 갖고 있는 cell 이름
+layer_maxshapes_a_layer,  maxshapes_a_layer를 갖고 있는 cell의 layer
+cell_maxshapes_all_layer, maxshapes-all-layer를 갖고 있는 cell 이름
 
-#maxcellsize,         가장 큰 cellsize(cell 시작과 끝의 총 파일 사이즈(단위: bytes))
+#maxcellsize,         가장 큰 cell size(cell 시작과 끝의 총 파일 사이즈(단위: bytes))
 #avgcellsize,         평균 cellsize(empty cell 제외)
 #mincellsize,         가장 작은 cell size(empty cell 제외)
 
-cell_maxcellsize,     가장 큰 cellsize를 갖고 있는 cell 이름
+cell_maxcellsize,     가장 큰 cell size를 갖고 있는 cell 이름
 cell_mincellsize,     가장 작은 cell size를 갖고 있는 cell 이름(empty cell제외)
 
-#cellsize-interval,   (maxcellsize - mincellsize) / 10
-#cellsize01 :(mincellsize+cellsize-interval*0)  <= && < (mincellsize+cellsize-interval*1)에 속하는 cell 개수
-~
-#cellsize10 : (mincellsize+cellsize-interval*9) <= && < (mincellsize+cellsize-interval*10)에 속하는 cell 개수
+#cellsize_interval,   maxcellsize/10
+#cellsize01,          cellsize_interval*0 ~ cellsize_interval*1에 속하는 cell 개수
+#cellsize02,          cellsize_interval*1 ~ cellsize_interval*2에 속하는 cell 개수
+#cellsize03,          cellsize_interval*2 ~ cellsize_interval*3에 속하는 cell 개수
+#cellsize04,          cellsize_interval*3 ~ cellsize_interval*4에 속하는 cell 개수
+#cellsize05,          cellsize_interval*4 ~ cellsize_interval*5에 속하는 cell 개수
+#cellsize06,          cellsize_interval*5 ~ cellsize_interval*6에 속하는 cell 개수
+#cellsize07,          cellsize_interval*6 ~ cellsize_interval*7에 속하는 cell 개수
+#cellsize08,          cellsize_interval*7 ~ cellsize_interval*8에 속하는 cell 개수
+#cellsize09,          cellsize_interval*8 ~ cellsize_interval*9에 속하는 cell 개수
+#cellsize10,          cellsize_interval*9 ~ cellsize_interval*10에 속하는 cell 개수
 
-#srep-00 : shapes 중 repeatition 00이 나온 회수
-~
-​#srep-11 : shapes 중 해당 repeatition 11이 나온 회수
+#srep_00,             shapes 중 repeatition type이 0인 회수
+#srep_01,             shapes 중 repeatition type이 1인 회수
+#srep_02,             shapes 중 repeatition type이 2인 회수
+#srep_03,             shapes 중 repeatition type이 3인 회수
+#srep_04,             shapes 중 repeatition type이 4인 회수
+#srep_05,             shapes 중 repeatition type이 5인 회수
+#srep_06,             shapes 중 repeatition type이 6인 회수
+#srep_07,             shapes 중 repeatition type이 7인 회수
+#srep_08,             shapes 중 repeatition type이 8인 회수
+#srep_09,             shapes 중 repeatition type이 9인 회수
+#srep_10,             shapes 중 repeatition type이 10인 회수
+#srep_11,             shapes 중 repeatition type이 11인 회수
 
-#sum-srep-00 : shapes 중 repeatition 00이 나온 회수의 총합(repeation 해제 시 개수를 계속 합산)
-~
-#sum-srep-11 : shapes 중 repeatition 11이 나온 회수의 총합(repeation 해제 시 개수를 계속 합산)
+#srep_00_expand,      shapes 중 repeatition type이 0이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_01_expand,      shapes 중 repeatition type이 1이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_02_expand,      shapes 중 repeatition type이 2이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_03_expand,      shapes 중 repeatition type이 3이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_04_expand,      shapes 중 repeatition type이 4이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_05_expand,      shapes 중 repeatition type이 5이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_06_expand,      shapes 중 repeatition type이 6이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_07_expand,      shapes 중 repeatition type이 7이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_08_expand,      shapes 중 repeatition type이 8이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_09_expand,      shapes 중 repeatition type이 9이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_10_expand,      shapes 중 repeatition type이 10이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#srep_11_expand,      shapes 중 repeatition type이 11이 나온 회수의 총합(repeation 해제 시 개수의 합)
 
-#prep-00 : placement 중 ...
-~
-#prep-11 : placement 중 ...
+#prep_00,             placement 중 repeatition type이 0인 회수
+#prep_01,             placement 중 repeatition type이 1인 회수
+#prep_02,             placement 중 repeatition type이 2인 회수
+#prep_03,             placement 중 repeatition type이 3인 회수
+#prep_04,             placement 중 repeatition type이 4인 회수
+#prep_05,             placement 중 repeatition type이 5인 회수
+#prep_06,             placement 중 repeatition type이 6인 회수
+#prep_07,             placement 중 repeatition type이 7인 회수
+#prep_08,             placement 중 repeatition type이 8인 회수
+#prep_09,             placement 중 repeatition type이 9인 회수
+#prep_10,             placement 중 repeatition type이 10인 회수
+#prep_11,             placement 중 repeatition type이 11인 회수
 
-#sum-prep-00 : placement 중 ...
-~
-#sum-prep-11 :  placement 중 ...
+#prep_00_expand,      placement 중 repeatition type이 0이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_01_expand,      placement 중 repeatition type이 1이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_02_expand,      placement 중 repeatition type이 2이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_03_expand,      placement 중 repeatition type이 3이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_04_expand,      placement 중 repeatition type이 4이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_05_expand,      placement 중 repeatition type이 5이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_06_expand,      placement 중 repeatition type이 6이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_07_expand,      placement 중 repeatition type이 7이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_08_expand,      placement 중 repeatition type이 8이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_09_expand,      placement 중 repeatition type이 9이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_10_expand,      placement 중 repeatition type이 10이 나온 회수의 총합(repeation 해제 시 개수의 합)
+#prep_11_expand,      placement 중 repeatition type이 11이 나온 회수의 총합(repeation 해제 시 개수의 합)
 
-#maxplist : 
-cell_maxplist :
-layer_maxplist : 
-#plist-00-02 : 4각형? , plist가 2이내 나온 회수
-#plist-03-04 : plist가 3, 4로 나온 회수
-#plist-05-14 : plist가 5부터 14이내로 나온 회수
-#plist-15-62 : plist가 15부터 62이내로 나온 회수
-#plist-63-xx : plist가 63이상인 회수
+#maxplist,            가장 긴 plist의 vertex 개수
+cell_maxplist,        가장 긴 plist를 갖고 있는 cell 이름
+layer_maxplist,       가장 긴 plist의 layer
+#plist_00_02,         vertex 개수가 4(plist는 2 ?) 회수
+#plist_03_06,         vertex 개수가 5~8 회수
+#plist_07_14,         vertex 개수가 9~16 회수 
+#plist_15_62,         vertex 개수가 17~64 회수 
+#plist_63_xx,         vertex 개수가 65 초과인 회수
 
 
 
