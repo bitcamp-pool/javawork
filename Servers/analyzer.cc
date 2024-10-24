@@ -1,78 +1,71 @@
 // analyzer.cc -- OASIS 파일 성능 분석기 구현
-//
 // last modified:   23-Oct-2024  Wed
 
-#include "analyzer.h"
+#include <cerrno>
+#include <cstring>
 #include <iostream>
-#include <fstream>
-#include <algorithm>
+#include "oasis.h"
+#include "analyzer.h"
+
+
 
 namespace Oasis {
 
-Analyzer::Analyzer() = default;
+using namespace std;
+using namespace SoftJin;
 
-Analyzer::~Analyzer() = default;
+
+Analyzer::Analyzer () {}
+
+/*virtual*/
+Analyzer::~Analyzer() { }
 
 const Statistics& Analyzer::getStatistics() const {
     return stats;
 }
 
-void Analyzer::beginFile(const std::string& version, const Oreal& unit, Validation::Scheme valScheme) {
-    std::cout << "Analyzing OASIS file. Version: " << version << std::endl;
-}
+Ulong Analyzer::getRepetitionCount() const {
+    switch (type) {
+    case RepetitionType::Rep_ReusePrevious:
+        return 1;  // 이전 반복을 재사용
 
-void Analyzer::endFile() {
-    std::cout << "OASIS file analysis complete." << std::endl;
-}
+    case RepetitionType::Rep_Matrix:
+        return xdimen * ydimen;
 
-void Analyzer::beginCell(CellName* cellName) {
-    currentCellName = cellName->getName();
-    currentCellShapes = 0;
-    currentCellRefs = 0;
-    cells.emplace_back(CellInfo{currentCellName});
-}
+    case RepetitionType::Rep_UniformX:
+        return dimen;
 
-void Analyzer::endCell() {
-    CellInfo& cell = cells.back();
-    cell.numShapes = currentCellShapes;
-    cell.numRefs = currentCellRefs;
+    case RepetitionType::Rep_UniformY:
+        return dimen;
 
-    updateMaxValues();
-    stats.totalCells++;
-}
+    case RepetitionType::Rep_VaryingX:
+    case RepetitionType::Rep_GridVaryingX:
+        return xOffsets.size();
 
-void Analyzer::beginPlacement(CellName* cellName, long x, long y, const Oreal& mag, const Oreal& angle, bool flip, const Repetition* rep) {
-    currentCellRefs++;
-    stats.totalPlacements++;
+    case RepetitionType::Rep_VaryingY:
+    case RepetitionType::Rep_GridVaryingY:
+        return yOffsets.size();
 
-    if (rep) {
-        stats.totalPlacementsExpand += rep->getCount() - 1;
+    case RepetitionType::Rep_TiltedMatrix:
+        return xdimen * ydimen;
+
+    case RepetitionType::Rep_Diagonal:
+        return dimen;
+
+    case RepetitionType::Rep_Arbitrary:
+    case RepetitionType::Rep_GridArbitrary:
+        return deltas.size();
+
+    default:
+        throw std::runtime_error("Unknown RepetitionType.");
     }
 }
 
-void Analyzer::beginRectangle(Ulong layer, Ulong datatype, long x, long y, long width, long height, const Repetition* rep) {
-    currentCellShapes++;
-    stats.totalShapes++;
-
-    if (rep) {
-        stats.totalShapesExpand += rep->getCount() - 1;
-    }
-}
-
-void Analyzer::beginPolygon(Ulong layer, Ulong datatype, long x, long y, const PointList& ptlist, const Repetition* rep) {
-    currentCellShapes++;
-    stats.totalShapes++;
-
-    size_t numVertices = ptlist.size();
-    if (numVertices <= 2) stats.plistCounts[0]++;
-    else if (numVertices <= 6) stats.plistCounts[1]++;
-    else if (numVertices <= 14) stats.plistCounts[2]++;
-    else if (numVertices <= 62) stats.plistCounts[3]++;
-    else stats.plistCounts[4]++;
-
-    if (rep) {
-        stats.totalShapesExpand += rep->getCount() - 1;
-    }
+void Analyzer::updateRepetitionStats(const Repetition* rep) {
+    if (!rep) return;
+    Ulong repCount = rep->getRepetitionCount();
+    stats.srepCounts[static_cast<int>(rep->type)]++;
+    stats.srepExpandCounts[static_cast<int>(rep->type)] += repCount - 1;
 }
 
 void Analyzer::updateMaxValues() {
@@ -87,23 +80,186 @@ void Analyzer::updateMaxValues() {
     }
 }
 
-void Analyzer::exportToCSV(const string& filename, const string& inputFilename, double elapsedTime, long long fileSizeMB) const {
-    std::ofstream outFile(filename);
-    outFile << "name,value\n";
-    outFile << "filename," << inputFilename << "\n";
-    outFile << "TAT(s)," << elapsedTime << "\n";
-    outFile << "filesize(MB)," << fileSizeMB << "\n";
-    outFile << "#cells," << stats.totalCells << "\n";
-    outFile << "#layers," << stats.totalLayers << "\n";
-    outFile << "#shapes," << stats.totalShapes << "\n";
-    outFile << "#shapes_expand," << stats.totalShapesExpand << "\n";
-    outFile << "#refs," << stats.totalPlacements << "\n";
-    outFile << "#refs_expand," << stats.totalPlacementsExpand << "\n";
-    outFile << "maxrefs," << stats.maxRefs << "\n";
-    outFile << "cell_maxrefs," << stats.cellWithMaxRefs << "\n";
-    outFile << "maxshapes_all_layer," << stats.maxShapesInCell << "\n";
-    outFile << "cell_maxshapes_all_layer," << stats.cellWithMaxShapes << "\n";
-    outFile.close();
+/*virtual*/ void
+Analyzer::beginFile (const string& version,
+                         const Oreal&  unit,
+                         Validation::Scheme valScheme)
+{
+    cout << "Analyzing OASIS file." << endl;
+    cout << "Version: " << version  << endl;
+    cout << "Unit: " << unit.getValue()  << endl;
+    cout << "ValidationScheme: " << valScheme  << endl;
 }
 
-}  // namespace Oasis
+/*virtual*/ void
+Analyzer::beginCell (CellName* cellName)
+{
+    currentCellName = cellName->getName();
+    currentCellShapes = 0;
+    currentCellRefs = 0;
+
+    if (cells.empty()) stats.emptyCells++;
+}
+
+/*virtual*/ void
+Analyzer::endFile() {
+    std::cout << "OASIS file analysis complete." << std::endl;
+}
+
+/*virtual*/ void
+Analyzer::endCell() {
+    CellInfo& cell = cells.back();
+    cell.numShapes = currentCellShapes;
+    cell.numRefs = currentCellRefs;
+
+    updateMaxValues();
+    stats.totalCells++;
+}
+
+/*virtual*/ void
+Analyzer::beginPlacement (CellName*  cellName,
+                              long x, long y,
+                              const Oreal&  mag,
+                              const Oreal&  angle,
+                              bool flip,
+                              const Repetition* rep)
+{
+    currentCellRefs++;
+    stats.totalPlacements++;
+
+    if (rep) {
+
+    }
+}
+
+/*virtual*/ void
+Analyzer::beginText (Ulong textlayer, Ulong texttype,
+                         long x, long y,
+                         TextString*  textString,
+                         const Repetition*  rep)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::beginRectangle (Ulong layer, Ulong datatype,
+                              long x, long y,
+                              long width, long height,
+                              const Repetition* rep)
+{
+    stats.totalRectangles++;
+    updateRepetitionStats(rep);
+}
+
+/*virtual*/ void
+Analyzer::beginPolygon (Ulong layer, Ulong datatype,
+                            long x, long y,
+                            const PointList& ptlist,
+                            const Repetition* rep)
+{
+    currentCellShapes++;
+    stats.totalShapes++;
+
+    size_t numVertices = ptlist.size();
+    if (numVertices <= 2) stats.plistCounts[0]++;
+    else if (numVertices <= 6) stats.plistCounts[1]++;
+    else if (numVertices <= 14) stats.plistCounts[2]++;
+    else if (numVertices <= 62) stats.plistCounts[3]++;
+    else stats.plistCounts[4]++;
+
+    if (rep) {
+
+    }
+}
+
+/*virtual*/ void
+Analyzer::beginPath (Ulong layer, Ulong datatype,
+                         long x, long  y,
+                         long halfwidth,
+                         long startExtn, long endExtn,
+                         const PointList&  ptlist,
+                         const Repetition* rep)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::beginTrapezoid (Ulong layer, Ulong datatype,
+                              long x, long  y,
+                              const Trapezoid& trap,
+                              const Repetition* rep)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::beginCircle (Ulong layer, Ulong datatype,
+                           long x, long y,
+                           long radius,
+                           const Repetition* rep)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::beginXElement (Ulong attribute, const string& data)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::beginXGeometry (Ulong layer, Ulong datatype,
+                              long x, long y,
+                              Ulong attribute,
+                              const string& data,
+                              const Repetition* rep)
+{
+
+}
+
+/*virtual*/ void
+Analyzer::addFileProperty (Property* prop) {
+
+}
+
+/*virtual*/ void
+Analyzer::addCellProperty (Property* prop) {
+
+}
+
+/*virtual*/ void
+Analyzer::addElementProperty (Property* prop) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerCellName (CellName* cellName) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerTextString (TextString* textString) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerPropName (PropName* propName) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerPropString (PropString* propString) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerLayerName (LayerName* layerName) {
+
+}
+
+/*virtual*/ void
+Analyzer::registerXName (XName* xname) {
+
+}
+
+} // namespace Oasis
