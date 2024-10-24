@@ -62,6 +62,13 @@ cell_maxshapes_a_layer,   maxshapes_a_layer를 갖고 있는 cell 이름
 layer_maxshapes_a_layer,  maxshapes_a_layer를 갖고 있는 cell의 layer
 cell_maxshapes_all_layer, maxshapes-all-layer를 갖고 있는 cell 이름
 
+#cellname_rec_str_3 : recode 3으로 cellname이 등록된 회수
+#cellname_rec_str_num_4 : recode 4으로 cellname이 등록된 회수
+#cell_rec_number_13 : recode 13으로 cell이 시작된 회수
+#cell_rec_name_14 : recode 14으로 cell이 시작된 회수
+#maxcblockcount_a_cell : cell안에 cblock이 여러번 선언될 수 있음. 선언된 회수 중 가장 큰 값
+cell_maxcblockcount_a_cell : maxcblockcount을 갖는 cellname
+
 #maxcellsize,         가장 큰 cell size(cell 시작과 끝의 총 파일 사이즈(단위: bytes))
 #avgcellsize,         평균 cellsize(empty cell 제외)
 #mincellsize,         가장 작은 cell size(empty cell 제외)
