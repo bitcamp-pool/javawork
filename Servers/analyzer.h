@@ -49,47 +49,21 @@ struct CellInfo {
     CellInfo(const std::string& cellName) : name(cellName) {}
 };
 
-// struct Statistics {
-//     long long totalCells = 0;
-//     long long totalLayers = 0;
-//     long long totalShapes = 0;
-//     long long totalShapesExpand = 0;
-//     long long totalPlacements = 0;
-//     long long totalPlacementsExpand = 0;
-//     long long totalText = 0;
-
-//     long long maxRefs = 0;
-//     long long maxShapesPerLayer = 0;
-//     long long maxShapesInCell = 0;
-
-//     string cellWithMaxRefs;
-//     string cellWithMaxShapes;
-
-//     std::set<int> xyrelative, xyabsolute;
-
-//     long long maxCellSize = 0;
-//     long long minCellSize = std::numeric_limits<long long>::max();
-//     long long totalCellSize = 0;
-
-//     vector<long long> cellSizeBins = vector<long long>(10, 0);
-//     vector<long long> plistCounts = vector<long long>(5, 0); // 00-02, 03-04, 05-14, 15-62, 63 이상
-// };
-
 struct Statistics {
     std::string filename;
     double TAT;  // 분석 수행 시간
     long long fileSizeMB;
     Ulong totalCells = 0;
     Ulong totalLayers = 0;
-    Ulong totalShapes = 0;
-    Ulong totalShapesExpand = 0;
-    Ulong totalPlacements = 0;
-    Ulong totalPlacementsExpand = 0;
+    Ulong totalShapes = 0; // geometry 개수(반복X)
+    Ulong totalShapesExpand = 0; // geometry 개수(반복 해제)
+    Ulong totalPlacements = 0; // refs 개수(반복X)
+    Ulong totalPlacementsExpand = 0; // refs 개수(반복 해제)
 
     bool cblock = false;
     bool strict = false;
     Ulong totalText = 0;
-    Ulong totalRectangles = 0;
+    Ulong totalRectangles = 0; // 반복X
     Ulong totalPolygons = 0;
     Ulong totalPaths = 0;
     Ulong totalTrapezoids = 0;
@@ -98,29 +72,54 @@ struct Statistics {
     Ulong totalXGeometry = 0;
     Ulong totalProperties = 0;
 
-    Ulong emptyCells = 0;
-    Ulong mixedCells = 0;
-    Ulong noShapeCells = 0;
-    Ulong primitiveCells = 0;
+    Ulong emptyCells = 0;     // Shapes(X) Placement(X)
+    Ulong mixedCells = 0;     // Shapes(O) Placement(O)
+    Ulong noShapeCells = 0;   // Shapes(X) Placement(O)
+    Ulong primitiveCells = 0; // Shapes(O) Placement(X)
 
-    Ulong maxRefs = 0;
-    Ulong maxShapesInLayer = 0;
-    Ulong maxShapesAllLayer = 0;
-    std::string cellMaxRefs;
-    std::string cellMaxShapesInLayer;
-    std::string layerMaxShapesInLayer;
-    std::string cellMaxShapesAllLayer;
+    bool xyRelative = false; // cell들 중에서 한 번이라도 선언된 적이 있으면 true, 없으면 false
+    bool xyAbsolute = false;
 
-    // 반복 유형별 통계
-    std::array<Ulong, 12> srepCounts = {0};
-    std::array<Ulong, 12> srepExpandCounts = {0};
+    Ulong maxRefs = 0;                 // 모든 cell을 순회하면서 cell이 가지고 있는 refs의 개수 중 max
+    Ulong maxShapesInLayer = 0;        // 모든 cell을 순회, cell내 모든 layer를 순회하면서 layer 중 가장 많은 shapes 개수
+    Ulong maxShapesAllLayer = 0;       // 모든 cell을 순회, cell이 갖는 totalShapes(모든 layer의 합) 가장 큰 값
+    std::string cellMaxRefs;           // maxrefs를 갖고 있는 cell 이름
+    std::string cellMaxShapesInLayer;  // maxshapes_a_layer를 갖고 있는 cell 이름
+    std::string layerMaxShapesInLayer; // maxshapes_a_layer를 갖고 있는 cell의 layer
+    std::string cellMaxShapesAllLayer; // maxshpaes_all_layer를 갖고 있는 cell 이름
+
+    Ulong cellNameRecord3Types = 0;    // '3' cellname-string
+    Ulong cellNameRecord4Types = 0;    // '4' cellname-string reference-number
+    Ulong cellRecord13Types = 0;       // '13' reference-number
+    Ulong cellRecord14Types = 0;       // '14' cellname-string
+
+    Ulong maxCblockCountAcell = 0;     // cell안에 cblock이 여러번 선언될 수 있음. 선언된 회수 중 가장 큰 값
+    std::string cellMaxCblockCountAcell; // maxCblockCountAcell 갖는 cell 이름
+
+    Ulong maxCellSize = 0;             // 가장 큰 cellsize(cell 시작과 끝의 파일내 거리) 단위: bytes
+    Ulong avgCellSize = 0;             // empty cell 제외   
+    Ulong minCellSize = 0;             // empty cell 제외
+    double cellSizeInterval = 0.0;     // maxCellSize / 10 
+
+    std::string cellMaxCellSize;       // 가장 큰 cellSize를 갖고 있는 cell 이름
+    std::string cellMinCellSize;       // empty cell 제외
+
+    // cellsize 통계(cellSizeInterval*0 ~ cellSizeInterval*1) ~ (cellSizeInterval*9 ~ cellSizeInterval*10) 범위에 속하는 cell의 개수
+    std::array<Ulong, 10> cellSizeCounts = {0};
+
+    // repetition 통계
+    std::array<Ulong, 12> srepCounts = {0};         // shapes 중 repetition type에 따른 회수
+    std::array<Ulong, 12> srepExpandCounts = {0};   // shapes 중 repetition type에 따른 회수(반복 해제)
     std::array<Ulong, 12> prepCounts = {0};
     std::array<Ulong, 12> prepExpandCounts = {0};
 
     // 기타 통계
-    Ulong maxPList = 0;
-    std::string cellMaxPList;
-    std::string layerMaxPList;
+    Ulong maxPList = 0;              // 가장 긴 plist의 vertex 개수
+    std::string cellMaxPList;        // 가장 긴 plist를 갖고 있는 cell 이름
+    std::string layerMaxPList;       // 가장 긴 plist의 layer
+
+    // plist 통계
+    std::array<Ulong, 5> plistCounts = {0}; // vertex 개수가 00-2, 03-06, 07-14, 15-62, 63 이상 범위의 회수
 };
 
 class Analyzer : public OasisBuilder {
