@@ -17,7 +17,7 @@ Laypop에 입력되는 oasis file의 구성 요소 중 성능에 영향을 주�
 [SW 조건]
 1. layout format 중 oasis만 입력 대상
 2. 도형 및 placement를 메모리에 저장하면 안됨
-3. 도형/placement 개수 산출 시 repeation을 해제하면 안됨. 해제 없이 개수만 증가
+3. 도형/placement 개수 산출 시 repeation을 해제하면 안됨. 해제 없이 개수만 증가(단, _expand 제외)
 4. 통계 추출을 위한 구조체만 메모리에 새로 생성(cell별 구조체 생성은 OK, layer별 구조체는 필요 없음)
 5. 숫자는 모두 long long
 6. 출력 파일은 out.csv 형식
