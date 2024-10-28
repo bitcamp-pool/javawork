@@ -1,265 +1,240 @@
-// analyzer.cc -- OASIS 파일 성능 분석기 구현
-// last modified:   23-Oct-2024  Wed
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
-#include "oasis.h"
-#include "analyzer.h"
-
-
-
-namespace Oasis {
-
-using namespace std;
-using namespace SoftJin;
-
-
-Analyzer::Analyzer () {}
-
-/*virtual*/
-Analyzer::~Analyzer() { }
-
-const Statistics& Analyzer::getStatistics() const {
-    return stats;
+OasisStatisticsBuilder::OasisStatisticsBuilder(OasisStatistics& stats, CSVWriter& csvWriter)
+    : oasisStats(stats),
+      writer(csvWriter),
+      currentCellRefCount(0),
+      currentCellShapeCount(0),
+      currentCellCBlockCount(0),
+      cellStartPosition(0)
+{
 }
 
-Ulong Analyzer::getRepetitionCount() const {
-    switch (type) {
-    case RepetitionType::Rep_ReusePrevious:
-        return 1;  // 이전 반복을 재사용
+// 셀 시작(초기화)
+void
+OasisStatisticsBuilder::BeginCell(CellName* cellName, long long startCellOffset) {
+    currentCellName = cellName->getName();
+    currentCellRefCount = 0;
+    currentCellShapeCount = 0;
+    currentCellCBlockCount = 0;
+    cellStartPosition = startCellOffset;
 
-    case RepetitionType::Rep_Matrix:
-        return xdimen * ydimen;
+    // Increase the total cell count
+    oasisStats.cellCount++;
+    cellStats.emplace_back(currentCellName);
+}
 
-    case RepetitionType::Rep_UniformX:
-        return dimen;
+void
+OasisStatisticsBuilder::EndCell(long long nextCellStartOffset) {
+    long long cellSize = nextCellStartOffset - cellStartPosition;
+    oasisStats.avgCellSize += cellSize;
 
-    case RepetitionType::Rep_UniformY:
-        return dimen;
+    // Update max and min cell size
+    if (cellSize > oasisStats.maxCellSize) {
+        oasisStats.maxCellSize = cellSize;
+        oasisStats.cellMaxCellSize = currentCellName;
+    }
+    if (cellSize < oasisStats.minCellSize && currentCellShapeCount > 0) {
+        oasisStats.minCellSize = cellSize;
+        oasisStats.cellMinCellSize = currentCellName;
+    }
 
-    case RepetitionType::Rep_VaryingX:
-    case RepetitionType::Rep_GridVaryingX:
-        return xOffsets.size();
+    // Update cell classification statistics
+    if (currentCellShapeCount == 0 && currentCellRefCount == 0) {
+        oasisStats.cellEmptyCount++;
+    } else if (currentCellShapeCount > 0 && currentCellRefCount > 0) {
+        oasisStats.cellMixedCount++;
+    } else if (currentCellShapeCount == 0 && currentCellRefCount > 0) {
+        oasisStats.cellNoShapeCount++;
+    } else if (currentCellShapeCount > 0 && currentCellRefCount == 0) {
+        oasisStats.cellPrimitiveCount++;
+    }
 
-    case RepetitionType::Rep_VaryingY:
-    case RepetitionType::Rep_GridVaryingY:
-        return yOffsets.size();
+    // Update max references count
+    if (currentCellRefCount > oasisStats.maxRefs) {
+        oasisStats.maxRefs = currentCellRefCount;
+        oasisStats.cellMaxRefs = currentCellName;
+    }
+}
 
-    case RepetitionType::Rep_TiltedMatrix:
-        return xdimen * ydimen;
+// Begin a placement element
+void
+OasisStatisticsBuilder::BeginPlacement(CellName* cellName, const Repetition* rep) {
+    currentCellRefCount++;
+    updateReferenceStatistics(rep, oasisStats.refCount, oasisStats.refCountExpanded);
+}
 
-    case RepetitionType::Rep_Diagonal:
-        return dimen;
+// Begin a rectangle element
+void
+OasisStatisticsBuilder::BeginRectangle(SoftJin::Ulong layer, SoftJin::Ulong datatype, const Repetition* rep) {
+    currentCellShapeCount++;
+    oasisStats.rectangleCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
 
-    case RepetitionType::Rep_Arbitrary:
-    case RepetitionType::Rep_GridArbitrary:
-        return deltas.size();
+// Begin a polygon element
+void
+OasisStatisticsBuilder::BeginPolygon(SoftJin::Ulong layer, SoftJin::Ulong datatype, const PointList& ptlist, const Repetition* rep) {
+    currentCellShapeCount++;
+    oasisStats.polygonCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
+
+// Begin a path element
+void
+OasisStatisticsBuilder::BeginPath(SoftJin::Ulong layer, SoftJin::Ulong datatype, const PointList& ptlist, const Repetition* rep) {
+    currentCellShapeCount++;
+    oasisStats.pathCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
+
+// Begin a trapezoid element
+void
+OasisStatisticsBuilder::BeginTrapezoid(SoftJin::Ulong layer, SoftJin::Ulong datatype, const Repetition* rep) {
+    currentCellShapeCount++;
+    oasisStats.trapezoidCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
+
+void OasisStatisticsBuilder::BeginCTrapezoid(SoftJin::Ulong layer, SoftJin::Ulong datatype, const Repetition *rep)
+{
+    currentCellShapeCount++;
+    oasisStats.ctrapezoidCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
+
+// Begin a circle element
+void
+OasisStatisticsBuilder::BeginCircle(SoftJin::Ulong layer, SoftJin::Ulong datatype, const Repetition* rep) {
+    currentCellShapeCount++;
+    oasisStats.circleCount++;
+    updateShapeStatistics(rep, oasisStats.shapeCount, oasisStats.shapeCountExpanded);
+}
+
+void OasisStatisticsBuilder::BeginText(SoftJin::Ulong textlayer, SoftJin::Ulong texttype, const Repetition *rep)
+{
+    oasisStats.textCount++;
+}
+
+void OasisStatisticsBuilder::BeginXGeometry(SoftJin::Ulong layer, SoftJin::Ulong datatype, const Repetition *rep)
+{
+    oasisStats.xgeometryCount++;
+}
+
+// End the current element (currently a placeholder)
+void
+OasisStatisticsBuilder::EndElement() {
+    // Placeholder for any finalization needed per element
+}
+
+void
+OasisStatisticsBuilder::finalizeStatistics() {
+    if (oasisStats.cellCount > 0) {
+        oasisStats.avgCellSize /= oasisStats.cellCount;
+    }
+    writer.OasisStatisticsWrite(oasisStats);
+}
+
+void
+OasisStatisticsBuilder::updateShapeStatistics(const Repetition* repetition, long long& count, long long& expandedCount) {
+    count++;
+    expandedCount += getExpandedCount(repetition);
+}
+
+void
+OasisStatisticsBuilder::updateReferenceStatistics(const Repetition* repetition, long long& count, long long& expandedCount) {
+    count++;
+    expandedCount += getExpandedCount(repetition);
+}
+
+void
+OasisStatisticsBuilder::updateRepetitionStatistics(const Repetition *rep, std::vector<long long>& repetitionCounts)
+{
+    if (rep == nullptr)
+        return;
+
+    RepetitionType repType = rep->getType();
+
+    switch (repType) {
+    case Rep_ReusePrevious:
+        ++repetitionCounts[0];
+        break;
+    case Rep_Matrix:
+        ++repetitionCounts[1];
+        break;
+    default:
+        break;
+    }
+
+}
+
+void
+OasisStatisticsBuilder::updateRepetitionExpandedStatistics(const Repetition* rep, std::vector<long long>& repetitionCountsExpanded)
+{
+    if (rep == nullptr)
+        return;
+
+    // 기본 반복 횟수를 계산
+    long long expandedCount = 1;
+
+    switch (rep->getType()) {
+    case Rep_ReusePrevious:
+        repetitionCountsExpanded[0] += expandedCount;
+        break;
+
+    case Rep_Matrix:
+        expandedCount = rep->getMatrixXdimen() * rep->getMatrixYdimen();
+        repetitionCountsExpanded[1] += expandedCount;
+        break;
 
     default:
-        throw std::runtime_error("Unknown RepetitionType.");
+        // 처리하지 않는 유형은 생략
+        break;
     }
 }
 
-void Analyzer::updateRepetitionStats(const Repetition* rep) {
-    if (!rep) return;
-    Ulong repCount = rep->getRepetitionCount();
-    stats.srepCounts[static_cast<int>(rep->type)]++;
-    stats.srepExpandCounts[static_cast<int>(rep->type)] += repCount - 1;
+
+
+
+long long
+OasisStatisticsBuilder::getVertexCount(const PointList& ptlist) const {
+    return ptlist.size();
 }
 
-void Analyzer::updateMaxValues() {
-    if (currentCellRefs > stats.maxRefs) {
-        stats.maxRefs = currentCellRefs;
-        stats.cellWithMaxRefs = currentCellName;
-    }
-
-    if (currentCellShapes > stats.maxShapesInCell) {
-        stats.maxShapesInCell = currentCellShapes;
-        stats.cellWithMaxShapes = currentCellName;
-    }
-}
-
-/*virtual*/ void
-Analyzer::beginFile (const string& version,
-                         const Oreal&  unit,
-                         Validation::Scheme valScheme)
+long long
+OasisStatisticsBuilder::getExpandedCount(const Repetition *repetition) const
 {
-    cout << "Analyzing OASIS file." << endl;
-    cout << "Version: " << version  << endl;
-    cout << "Unit: " << unit.getValue()  << endl;
-    cout << "ValidationScheme: " << valScheme  << endl;
+        if (!repetition) {
+            return 1;
+        }
+
+        RepetitionType repType = repetition->getType();
+        long long expandedCount = 0;
+
+        switch(repType) {
+        case Rep_ReusePrevious:
+            expandedCount = 1;
+            break;
+        case Rep_Matrix:
+            expandedCount = repetition->getMatrixXdimen() * repetition->getMatrixYdimen();
+            break;
+        case Rep_UniformX:
+        case Rep_UniformY:
+        case Rep_VaryingX:
+        case Rep_VaryingY:
+        case Rep_GridVaryingX:
+        case Rep_GridVaryingY:
+        case Rep_Arbitrary:
+        case Rep_GridArbitrary:
+        case Rep_Diagonal:
+            expandedCount = repetition->getDimen();
+            break;
+        case Rep_TiltedMatrix:
+            expandedCount = repetition->getMatrixNdimen() * repetition->getMatrixMdimen();
+            break;
+        default:
+            expandedCount = 1;
+            break;
+        }
+
+        return expandedCount;
 }
-
-/*virtual*/ void
-Analyzer::beginCell (CellName* cellName)
-{
-    currentCellName = cellName->getName();
-    currentCellShapes = 0;
-    currentCellRefs = 0;
-
-    if (cells.empty()) stats.emptyCells++;
-}
-
-/*virtual*/ void
-Analyzer::endFile() {
-    std::cout << "OASIS file analysis complete." << std::endl;
-}
-
-/*virtual*/ void
-Analyzer::endCell() {
-    CellInfo& cell = cells.back();
-    cell.numShapes = currentCellShapes;
-    cell.numRefs = currentCellRefs;
-
-    updateMaxValues();
-    stats.totalCells++;
-}
-
-/*virtual*/ void
-Analyzer::beginPlacement (CellName*  cellName,
-                              long x, long y,
-                              const Oreal&  mag,
-                              const Oreal&  angle,
-                              bool flip,
-                              const Repetition* rep)
-{
-    currentCellRefs++;
-    stats.totalPlacements++;
-
-    if (rep) {
-
-    }
-}
-
-/*virtual*/ void
-Analyzer::beginText (Ulong textlayer, Ulong texttype,
-                         long x, long y,
-                         TextString*  textString,
-                         const Repetition*  rep)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::beginRectangle (Ulong layer, Ulong datatype,
-                              long x, long y,
-                              long width, long height,
-                              const Repetition* rep)
-{
-    stats.totalRectangles++;
-    updateRepetitionStats(rep);
-}
-
-/*virtual*/ void
-Analyzer::beginPolygon (Ulong layer, Ulong datatype,
-                            long x, long y,
-                            const PointList& ptlist,
-                            const Repetition* rep)
-{
-    currentCellShapes++;
-    stats.totalShapes++;
-
-    size_t numVertices = ptlist.size();
-    if (numVertices <= 2) stats.plistCounts[0]++;
-    else if (numVertices <= 6) stats.plistCounts[1]++;
-    else if (numVertices <= 14) stats.plistCounts[2]++;
-    else if (numVertices <= 62) stats.plistCounts[3]++;
-    else stats.plistCounts[4]++;
-
-    if (rep) {
-
-    }
-}
-
-/*virtual*/ void
-Analyzer::beginPath (Ulong layer, Ulong datatype,
-                         long x, long  y,
-                         long halfwidth,
-                         long startExtn, long endExtn,
-                         const PointList&  ptlist,
-                         const Repetition* rep)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::beginTrapezoid (Ulong layer, Ulong datatype,
-                              long x, long  y,
-                              const Trapezoid& trap,
-                              const Repetition* rep)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::beginCircle (Ulong layer, Ulong datatype,
-                           long x, long y,
-                           long radius,
-                           const Repetition* rep)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::beginXElement (Ulong attribute, const string& data)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::beginXGeometry (Ulong layer, Ulong datatype,
-                              long x, long y,
-                              Ulong attribute,
-                              const string& data,
-                              const Repetition* rep)
-{
-
-}
-
-/*virtual*/ void
-Analyzer::addFileProperty (Property* prop) {
-
-}
-
-/*virtual*/ void
-Analyzer::addCellProperty (Property* prop) {
-
-}
-
-/*virtual*/ void
-Analyzer::addElementProperty (Property* prop) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerCellName (CellName* cellName) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerTextString (TextString* textString) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerPropName (PropName* propName) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerPropString (PropString* propString) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerLayerName (LayerName* layerName) {
-
-}
-
-/*virtual*/ void
-Analyzer::registerXName (XName* xname) {
-
-}
-
-} // namespace Oasis
