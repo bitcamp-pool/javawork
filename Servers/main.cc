@@ -30,12 +30,13 @@
 #include <cstring>
 #include <unistd.h>
 #include "misc/utils.h"
-#include "parser.h"
+#include "analyzer.h"
+#include "oasis_statistics.h"
+#include "csv_writer.h"
 
 #include <iostream>
 #include <chrono>
-#include "analyzer.h"
-#include "csv_writer.h"
+
 
 using namespace std;
 using namespace SoftJin;
@@ -74,7 +75,7 @@ main(int argc, char* argv[])
 {
     SetProgramName(argv[0]);
 
-    OasisParserOptions parserOptions;
+    Jeong::OasisParserOptions parserOptions;
 
     int opt;
     opterr = 0;
@@ -95,14 +96,15 @@ main(int argc, char* argv[])
     const char* infilename = argv[optind];
     const char* outfilename = argv[optind + 1];
 
-    CSVWriter writer(outfilename);
-    Analyzer analyzer;
+    Jeong::CSVWriter writer(outfilename);
+    Jeong::OasisStatistics oasisStats(infilename);
+    Jeong::OasisStatisticsBuilder builder(oasisStats, writer);
 
     auto start = high_resolution_clock::now();
 
     try {
-        Oasis::OasisParser parser(infilename, DisplayWarning, parserOptions);
-        parser.parseFile(&analyzer);
+        Oasis::Jeong::OasisParser parser(infilename, DisplayWarning, parserOptions);
+        parser.parseFile(&builder);
     } catch (const std::exception& exc) {
         FatalError("%s", exc.what());
         return 1;
@@ -110,8 +112,18 @@ main(int argc, char* argv[])
 
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(end - start).count();
-    writer.StatisticsWrite(analyzer.getStatistics());
-    cout << "Analysis completed in " << duration << " seconds." << endl;
+    oasisStats.analysisTimeSec = duration;
+
+    try {
+        builder.finalizeStatistics();
+        cout << "Analysis completed in " << duration << " seconds." << endl;
+    } catch (const std::exception& exc) {
+        cerr << "Error during finalizing statistics: " << exc.what() << endl;
+        return 1;
+    } catch (...) {
+        cerr << "Unknown error occurred during finalizing statistics." << endl;
+        return 1;
+    }
 
     return 0;
 }
