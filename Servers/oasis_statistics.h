@@ -78,22 +78,30 @@ struct OasisStatistics {
     string cellMinCellSize;                     // 가장 작은 cell size를 갖고 있는 cell 이름(empty cell제외)
 
     long long cellSizeInterval = 0;             // maxCellSize / 10
-    long long cellSizes[10] = {0};              // cellsize_interval*(idx) ~ cellsize_interval*(idx+1)에 속하는 cell 개수
+    vector<long long> cellSizes;                // cellsize_interval*(idx) ~ cellsize_interval*(idx+1)에 속하는 cell 개수
 
-    long long srepCounts[12] = {0};             // shapes 중 repeatition type이 idx가 나온 회수
-    long long srepCountsExpanded[12] = {0};     // shapes 중 repeatition type이 idx가 나온 회수의 총합(repeation 해제 시 개수의 합)
-    long long prepCounts[12] = {0};             // placement 중 repeatition type이 idx가 나온 회수
-    long long prepCountsExpanded[12] = {0};     // placement 중 repeatition type이 idx가 나온 회수의 총합(repeation 해제 시 개수의 합)
+    vector<long long> srepCounts;               // shapes 중 repeatition type이 idx가 나온 회수
+    vector<long long> srepCountsExpanded;       // shapes 중 repeatition type이 idx가 나온 회수의 총합(repeation 해제 시 개수의 합)
+    vector<long long> prepCounts;               // placement 중 repeatition type이 idx가 나온 회수
+    vector<long long> prepCountsExpanded;       // placement 중 repeatition type이 idx가 나온 회수의 총합(repeation 해제 시 개수의 합)
 
     long long maxPlistCount = 0;                // 가장 긴 plist의 vertex 개수
     string cellMaxPlistCount;                   // maxPlistCount를 갖는 cell 이름
     string layerMaxPlistCount;                  // maxPlistCount를 갖는 layer
-    long long plists[5] = {0};                  // vertex 개수가 {0~2, 3~6, 7~14, 15~62, 63~}의 범위에 속하는 회수
+    vector<long long> plists;                   // vertex 개수가 {0~2, 3~6, 7~14, 15~62, 63~}의 범위에 속하는 회수
 
     unordered_map<std::string, void*> mapper;   // 데이터 매핑용
     vector<std::string> keyOrder;          // 출력 순서 저장용
 
-    OasisStatistics(const std::string& file) : filename(file) {
+    OasisStatistics(const std::string& file)
+        : filename(file),
+        cellSizes(10, 0),
+        srepCounts(12, 0),
+        srepCountsExpanded(12, 0),
+        prepCounts(12, 0),
+        prepCountsExpanded(12, 0),
+        plists(5, 0)
+    {
         // Initialize the mapper
 
 
