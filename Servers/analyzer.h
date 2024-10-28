@@ -51,12 +51,13 @@ private:
 
     long long getVertexCount(const PointList& ptlist) const;
     long long getExpandedCount(const Repetition* repetition) const;
+
     void updateShapeStatistics(const Repetition* repetition, long long& count, long long& expandedCount);
     void updateReferenceStatistics(const Repetition* repetition, long long& count, long long& expandedCount);
-    void updateShapeRepetitionCounts(const Repetition* rep, long long& srepCounts);
-    void updateShapeRepetitionCountsExpanded(const Repetition* rep, long long& srepCountsExpanded);
-    void updatePlacementRepetitionCounts(const Repetition* rep, long long& prepCounts);
-    void updatePlacementRepetitionCountsExpanded(const Repetition* rep, long long& prepCountsExpanded);
+
+    void updateRepetitionStatistics(const Repetition* rep, std::vector<long long>& repetitionCounts);
+    void updateRepetitionExpandedStatistics(const Repetition* rep, std::vector<long long>& repetitionCountsExpanded);
+
 
     // OasisBuilder interface
 public:
