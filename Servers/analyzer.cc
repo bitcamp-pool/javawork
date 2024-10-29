@@ -25,6 +25,11 @@ OasisStatisticsBuilder::BeginCell(CellName* cellName, long long startCellOffset)
 
 void
 OasisStatisticsBuilder::EndCell(long long nextCellStartOffset) {
+    cellStats.back().cellRefCount = currentCellRefCount;
+    cellStats.back().cellShapeCount = currentCellShapeCount;
+    cellStats.back().cellCBlockCount = currentCellCBlockCount;
+    cellStats.back().offset = cellStartPosition;
+    
     long long cellSize = nextCellStartOffset - cellStartPosition;
     oasisStats.avgCellSize += cellSize;
 
@@ -125,6 +130,9 @@ void
 OasisStatisticsBuilder::EndElement() {
     // Placeholder for any finalization needed per element
 }
+
+endFile()
+oasisStats.filesizeMB = endFileOffset + EndRecordSize;    
 
 void
 OasisStatisticsBuilder::finalizeStatistics() {
