@@ -24,7 +24,7 @@ public:
     OasisStatisticsBuilder(OasisStatistics& stats, CSVWriter& csvWriter);
 
     void BeginCell(CellName* cellName, long long startCellOffset);
-    void EndCell(long long endCellOffset);
+    void EndCell();
     void BeginPlacement(CellName* cellName, const Repetition* rep);
     void BeginRectangle(Ulong layer, Ulong datatype, const Repetition* rep);
     void BeginPolygon(Ulong layer, Ulong datatype, const PointList& ptlist, const Repetition* rep);
@@ -44,16 +44,47 @@ private:
     OasisStatistics& oasisStats;
     vector<CellStatistics> cellStats;
     CSVWriter& writer;
+
     string currentCellName;
     long long currentCellRefCount;
     long long currentCellShapeCount;
     long long currentCellCBlockCount;
     long long cellStartPosition;
 
+    void initializeCurrentCell(const std::string& name, long long offset);
+
+/*
+enum RepetitionType {
+    Rep_ReusePrevious   = 0,
+    Rep_Matrix          = 1,    // array aligned with the axes
+    Rep_UniformX        = 2,    // uniformly spaced in a row
+    Rep_UniformY        = 3,    // uniformly spaced in a column
+    Rep_VaryingX        = 4,    // in a row with varying spaces between elems
+    Rep_GridVaryingX    = 5,    // like VaryingX but elems are on grid points
+    Rep_VaryingY        = 6,    // in a col with varying spaces between elems
+    Rep_GridVaryingY    = 7,    // like VaryingY but elems are on grid points
+    Rep_TiltedMatrix    = 8,    // like Matrix but may be tilted
+    Rep_Diagonal        = 9,    // uniform spacing in line at any angle
+    Rep_Arbitrary       = 10,   // elements can be anywhere
+    Rep_GridArbitrary   = 11    // elements can be on any grid point
+};
+ */
+
+    void updateElementStats (
+        long long& elementCount,
+        const Repetition* rep,
+        std::vector<long long>& repCounts,
+        std::vector<long long>& repCountsExpanded);
+
+    void updateRepetitionFrequency (
+        const Repetition* rep,
+        std::vector<long long>& counts,
+        bool expanded);
+
     void updateNormalOrExpandedCount(const Repetition* rep, long long& count, long long& expandedCount);
     void updateRepetitionTypeFrequency(const Repetition* rep, std::vector<long long>& repetitionCounts);
     void updateRepetitionTypeExpandedFrequency(const Repetition* rep, std::vector<long long>& repetitionCountsExpanded);
-    
+
     long long getVertexCount(const PointList& ptlist) const;
     long long getExpandedCount(const Repetition* repetition) const;
 
