@@ -35,6 +35,7 @@ public:
     void BeginText(Ulong textlayer, Ulong texttype, const Repetition* rep);
     void BeginXGeometry(Ulong layer, Ulong datatype, const Repetition* rep);
     void EndElement();
+    void EndFile(long long endFileOffset);
 
     // Custom functions to manage statistics collection and CSV output
     void finalizeStatistics();
@@ -49,15 +50,12 @@ private:
     long long currentCellCBlockCount;
     long long cellStartPosition;
 
+    void updateNormalOrExpandedCount(const Repetition* rep, long long& count, long long& expandedCount);
+    void updateRepetitionTypeFrequency(const Repetition* rep, std::vector<long long>& repetitionCounts);
+    void updateRepetitionTypeExpandedFrequency(const Repetition* rep, std::vector<long long>& repetitionCountsExpanded);
+    
     long long getVertexCount(const PointList& ptlist) const;
     long long getExpandedCount(const Repetition* repetition) const;
-
-    void updateShapeStatistics(const Repetition* repetition, long long& count, long long& expandedCount);
-    void updateReferenceStatistics(const Repetition* repetition, long long& count, long long& expandedCount);
-
-    void updateRepetitionStatistics(const Repetition* rep, std::vector<long long>& repetitionCounts);
-    void updateRepetitionExpandedStatistics(const Repetition* rep, std::vector<long long>& repetitionCountsExpanded);
-
 
     // OasisBuilder interface
 public:
