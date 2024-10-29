@@ -12,13 +12,24 @@ namespace Jeong {
 
 using namespace std;
 
+struct Layer {
+    std::string layerName;
+    long long shapeCount = 0;
+    Layer(const std::string& name) : layerName(name) {}
+}
 struct CellStatistics {
     std::string cellName;
+
     long long cellRefCount = 0;
     long long cellShapeCount = 0;
     long long cellCBlockCount = 0;
+
     long long offset = 0;
 
+    bool isShape = false;
+    bool isPlacement = false;
+
+    vector<Layer> layers;
     CellStatistics(const std::string& name) : cellName(name) {}
 };
 
